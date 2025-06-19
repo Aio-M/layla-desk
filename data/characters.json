@@ -1,0 +1,18 @@
+[
+  {
+    "id": "layla",
+    "name": "レイラ",
+    "rarity": 4,
+    "element": "氷",
+    "weapon_type": "片手剣",
+    "image_path": "images/characters/layla.png"
+  },
+  {
+    "id": "nahida",
+    "name": "ナヒーダ",
+    "rarity": 5,
+    "element": "草",
+    "weapon_type": "法器",
+    "image_path": "images/characters/nahida.png"
+  }
+]
