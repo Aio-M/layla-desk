@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layla Desk - 原神育成計画ツール</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #667eea 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .hero-section {
+            margin-bottom: 60px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 2px 2px 8px rgba(0,0,0,0.3), 0 0 20px rgba(79, 70, 229, 0.5); }
+            to { text-shadow: 2px 2px 8px rgba(0,0,0,0.3), 0 0 30px rgba(79, 70, 229, 0.8); }
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #fbbf24, #f59e0b, #d97706);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .version {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 60px;
+        }
+
+        .nav-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .nav-card:hover::before {
+            left: 100%;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .nav-card-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .nav-card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .nav-card-description {
+            font-size: 1rem;
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+
+        .features-section {
+            margin-top: 40px;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .features-title {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 800px;
+        }
+
+        .feature-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: left;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .feature-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
+        .footer {
+            margin-top: 60px;
+            padding: 20px;
+            text-align: center;
+            opacity: 0.6;
+            font-size: 0.9rem;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* レスポンシブ対応 */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 3rem;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .nav-buttons {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .nav-card {
+                padding: 30px 20px;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* インストール促進バナー */
+        .install-banner {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(79, 70, 229, 0.9);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.9rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .install-banner.show {
+            opacity: 1;
+        }
+
+        .install-banner button {
+            background: white;
+            color: #4f46e5;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 15px;
+            margin-left: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .install-banner button:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero-section">
+            <div class="logo">🌙</div>
+            <h1 class="title">Layla Desk</h1>
+            <p class="subtitle">
+                原神の育成計画を効率的に管理する<br>
+                あなた専用のデスクトップツール
+            </p>
+            <div class="version">Version 1.0</div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="characters.html" class="nav-card">
+                <span class="nav-card-icon">🧙‍♀️</span>
+                <h2 class="nav-card-title">キャラクター・武器選択</h2>
+                <p class="nav-card-description">
+                    育成したいキャラクターと武器を選んで、目標レベルを設定しましょう
+                </p>
+            </a>
+
+            <a href="planning.html" class="nav-card">
+                <span class="nav-card-icon">📊</span>
+                <h2 class="nav-card-title">育成計画</h2>
+                <p class="nav-card-description">
+                    必要な素材を確認して、効率的な育成スケジュールを立てましょう
+                </p>
+            </a>
+        </div>
+
+        <div class="features-section">
+            <h2 class="features-title">✨ 主な機能</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <span class="feature-icon">📱</span>
+                    <h3 class="feature-title">オフライン対応</h3>
+                    <p class="feature-description">
+                        インターネット接続なしでも使用可能。データはローカルに安全保存。
+                    </p>
+                </div>
+                
+                <div class="feature-item">
+                    <span class="feature-icon">🔄</span>
+                    <h3 class="feature-title">自動計算</h3>
+                    <p class="feature-description">
+                        キャラクターと武器のレベルに応じて、必要素材を自動で計算。
+                    </p>
+                </div>
+                
+                <div class="feature-item">
+                    <span class="feature-icon">📦</span>
+                    <h3 class="feature-title">素材管理</h3>
+                    <p class="feature-description">
+                        現在の所持数を記録して、不足分を一目で確認できます。
+                    </p>
+                </div>
+                
+                <div class="feature-item">
+                    <span class="feature-icon">🎯</span>
+                    <h3 class="feature-title">効率的な計画</h3>
+                    <p class="feature-description">
+                        複数キャラクターの同時育成も考慮した最適な計画を提案。
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>🌟 旅人の冒険をサポートします 🌟</p>
+            <p>Made with ❤️ for Genshin Impact players</p>
+        </div>
+    </div>
+
+    <!-- PWAインストール促進バナー -->
+    <div id="installBanner" class="install-banner">
+        📱 アプリとしてインストールできます
+        <button onclick="installApp()">インストール</button>
+        <button onclick="hideInstallBanner()" style="background: transparent; color: white; border: 1px solid white;">後で</button>
+    </div>
+
+    <script>
+        // PWA関連の変数
+        let deferredPrompt;
+        const installBanner = document.getElementById('installBanner');
+
+        // PWAインストール可能時のイベント
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // モバイルデバイスの場合のみバナーを表示
+            if (window.innerWidth <= 768) {
+                setTimeout(() => {
+                    installBanner.classList.add('show');
+                }, 3000);
+            }
+        });
+
+        // アプリインストール実行
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('PWAがインストールされました');
+                    }
+                    deferredPrompt = null;
+                    hideInstallBanner();
+                });
+            }
+        }
+
+        // インストールバナーを非表示
+        function hideInstallBanner() {
+            installBanner.classList.remove('show');
+            // 1日後まで再表示しない
+            localStorage.setItem('installBannerHidden', Date.now());
+        }
+
+        // ページ読み込み時の処理
+        document.addEventListener('DOMContentLoaded', () => {
+            // バナー非表示の確認
+            const hiddenTime = localStorage.getItem('installBannerHidden');
+            if (hiddenTime && Date.now() - hiddenTime < 24 * 60 * 60 * 1000) {
+                return; // 24時間以内なら表示しない
+            }
+
+            // アニメーション遅延実行
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+        });
+
+        // Service Worker登録
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully');
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        // ページ遷移時のアニメーション
+        document.querySelectorAll('.nav-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                e.preventDefault();
+                const href = card.getAttribute('href');
+                
+                // フェードアウトアニメーション
+                document.body.style.transition = 'opacity 0.3s ease';
+                document.body.style.opacity = '0';
+                
+                setTimeout(() => {
+                    window.location.href = href;
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html>
