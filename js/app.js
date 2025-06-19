@@ -29,6 +29,20 @@ async function loadCharacters() {
 
             // カードの中身となるHTMLを生成します
             card.innerHTML = `
-                <img src="<span class="math-inline">\{character\.image\_path\}" <3\>alt\="</span>{character.name}" class="character-image">
+                <img src="${character.image_path}" alt="${character.name}" class="character-image">
                 <div class="character-info">
-                    <h3 class="character-name"><span class="math-inline">\{character\.name\}</h3\>
+                    <h3 class="character-name">${character.name}</h3>
+                    <p class="character-meta">★${character.rarity} / ${character.element} / ${character.weapon_type}</p>
+                </div>
+            `;
+
+            // ページに完成したカードを追加します
+            listElement.appendChild(card);
+        });
+
+    } catch (error) {
+        // 途中でエラーが起きたら、メッセージを表示します
+        console.error('キャラクターデータの読み込みに失敗しました:', error);
+        listElement.innerHTML = '<p>データの読み込みに失敗しました。ページを更新してみてください。</p>';
+    }
+}
