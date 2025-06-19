@@ -43,3 +43,48 @@ body {
     text-align: center;
     margin-bottom: 40px;
 }
+
+/* === キャラクター選択ページ === */
+#character-list {
+    display: grid;
+    /* 画面幅に応じてカードの列数を自動調整 */
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px; /* カード間の余白 */
+}
+
+.character-card {
+    background-color: #2d3748; /* カードの背景色 */
+    border: 1px solid #4a5568;
+    border-radius: 8px; /* カードの角を丸める */
+    text-align: center;
+    overflow: hidden; /* カードの外にはみ出した要素を隠す */
+    cursor: pointer; /* マウスカーソルを手の形に */
+    transition: transform 0.2s ease, box-shadow 0.2s ease; /* アニメーション設定 */
+}
+
+.character-card:hover {
+    transform: translateY(-5px); /* 少し上に浮き上がる */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+}
+
+.character-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover; /* 画像の比率を保ったままトリミング */
+    background-color: #1a202c; /* 画像がない場合の背景色 */
+}
+
+.character-info {
+    padding: 15px;
+}
+
+.character-name {
+    margin: 0 0 5px 0;
+    font-size: 1.2rem;
+}
+
+.character-meta {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #a0aec0; /* 少し薄い文字色 */
+}
