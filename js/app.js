@@ -42,13 +42,26 @@ function setupModalEventListeners() {
     removeBtn.addEventListener('click', removeCharacterFromPlan);
 }
 
+// ... (ファイル上部のコードは変更なし)
+
+// ▼▼▼ openLevelModal, saveLevelData, displaySelectedCharacters を更新 ▼▼▼
+
 function openLevelModal(charId) {
     currentlyEditingCharId = charId;
     const charData = allCharacterData.find(c => c.id === charId);
     const selectionData = selectedCharacters.find(c => c.id === charId);
+
     document.getElementById('modal-char-name').textContent = charData.name;
+    // キャラクターレベルの入力値を設定
     document.getElementById('current-lvl-input').value = selectionData ? selectionData.currentLvl : 1;
     document.getElementById('target-lvl-input').value = selectionData ? selectionData.targetLvl : 90;
+
+    // ★天賦レベルの入力値を設定
+    for (let i = 1; i <= 3; i++) {
+        document.getElementById(`talent${i}-current-input`).value = selectionData ? selectionData[`talent${i}_current`] : 1;
+        document.getElementById(`talent${i}-target-input`).value = selectionData ? selectionData[`talent${i}_target`] : 1;
+    }
+
     document.getElementById('modal-remove-btn').style.display = selectionData ? 'block' : 'none';
     document.getElementById('level-modal-overlay').style.display = 'flex';
 }
@@ -60,15 +73,26 @@ function closeLevelModal() {
 
 function saveLevelData() {
     if (!currentlyEditingCharId) return;
-    const currentLvl = parseInt(document.getElementById('current-lvl-input').value, 10);
-    const targetLvl = parseInt(document.getElementById('target-lvl-input').value, 10);
+    const newSelection = {
+        id: currentlyEditingCharId,
+        currentLvl: parseInt(document.getElementById('current-lvl-input').value, 10),
+        targetLvl: parseInt(document.getElementById('target-lvl-input').value, 10),
+        talent1_current: parseInt(document.getElementById('talent1-current-input').value, 10),
+        talent1_target: parseInt(document.getElementById('talent1-target-input').value, 10),
+        talent2_current: parseInt(document.getElementById('talent2-current-input').value, 10),
+        talent2_target: parseInt(document.getElementById('talent2-target-input').value, 10),
+        talent3_current: parseInt(document.getElementById('talent3-current-input').value, 10),
+        talent3_target: parseInt(document.getElementById('talent3-target-input').value, 10),
+    };
+
     const existingIndex = selectedCharacters.findIndex(c => c.id === currentlyEditingCharId);
+
     if (existingIndex > -1) {
-        selectedCharacters[existingIndex].currentLvl = currentLvl;
-        selectedCharacters[existingIndex].targetLvl = targetLvl;
+        selectedCharacters[existingIndex] = newSelection;
     } else {
-        selectedCharacters.push({ id: currentlyEditingCharId, currentLvl: currentLvl, targetLvl: targetLvl });
+        selectedCharacters.push(newSelection);
     }
+
     saveSelection();
     renderCharacters();
     closeLevelModal();
@@ -200,38 +224,24 @@ function displaySelectedCharacters() {
         if(charData) {
             const item = document.createElement('div');
             item.className = 'plan-char-item';
+            // ★天賦レベルも表示するように変更
             item.innerHTML = `
-                <img src="${charData.image_path}" alt="${charData.name}">
+                <img src="<span class="math-inline">\{charData\.image\_path\}" alt\="</span>{charData.name}">
                 <div class="plan-char-details">
                     <div class="plan-char-info">
                         <span class="plan-char-name">${charData.name}</span>
-                        <span class="plan-char-level-display">
-                            Lv <span id="current-lvl-display-${charData.id}">${obj.currentLvl}</span> / ${obj.targetLvl}
-                        </span>
+                        <span class="plan-char-level-display">Lv <span class="math-inline">\{obj\.currentLvl\}→</span>{obj.targetLvl}</span>
                     </div>
-                    <div class="value-adjuster">
-                        <button class="btn-step" data-id="${charData.id}" data-type="char-level" data-amount="-10">--</button>
-                        <button class="btn-step" data-id="${charData.id}" data-type="char-level" data-amount="-1">-</button>
-                        <input type="range" class="value-slider" id="slider-char-level-${charData.id}"
-                               min="1" max="${obj.targetLvl}" value="${obj.currentLvl}" data-id="${charData.id}" data-type="char-level">
-                        <button class="btn-step" data-id="${charData.id}" data-type="char-level" data-amount="1">+</button>
-                        <button class="btn-step" data-id="${charData.id}" data-type="char-level" data-amount="10">++</button>
+                    <div class="plan-char-talents-display">
+                        天賦: <span class="math-inline">\{obj\.talent1\_current\}→</span>{obj.talent1_target} / <span class="math-inline">\{obj\.talent2\_current\}→</span>{obj.talent2_target} / <span class="math-inline">\{obj\.talent3\_current\}→</span>{obj.targetLvl}
                     </div>
-                </div>`;
+                </div>
+                <button class="delete-char-btn" data-id="${charData.id}">×</button>
+            `;
             listElement.appendChild(item);
         }
     });
-
-    listElement.querySelectorAll('.btn-step[data-type="char-level"]').forEach(button => {
-        button.addEventListener('click', (e) => {
-            updateCharacterLevelOnPlan(e.target.dataset.id, parseInt(e.target.dataset.amount, 10));
-        });
-    });
-    listElement.querySelectorAll('.value-slider[data-type="char-level"]').forEach(slider => {
-        slider.addEventListener('input', (e) => {
-            updateCharacterLevelOnPlan(e.target.dataset.id, parseInt(e.target.value, 10), true);
-        });
-    });
+    // (削除ボタンのイベントリスナーは変更なし)
 }
 
 function displayRequiredMaterials() {
