@@ -279,7 +279,6 @@ body {
     color: #a0aec0;
 }
 
-/* ▼▼▼ 新しいレベル/素材カウンターの共通スタイル ▼▼▼ */
 .value-adjuster {
     display: flex;
     align-items: center;
@@ -294,15 +293,43 @@ body {
     border-radius: 6px;
     font-weight: bold;
     cursor: pointer;
-    width: 35px; /* ボタンの横幅 */
-    padding: 4px 0;
+    width: 35px;
+    height: 28px; /* 高さを指定 */
+    padding: 0;
+    font-size: 1.1rem; /* アイコン風にするため少し大きく */
+    line-height: 28px; /* 文字を中央に */
 }
-.btn-step:hover {
-    background-color: #434190;
+
+/* ▼▼▼ スライダーのスタイルを追加 ▼▼▼ */
+.value-slider {
+    -webkit-appearance: none; /* デフォルトのスタイルを無効化 */
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    background: #1a202c;
+    border-radius: 5px;
+    outline: none;
+}
+/* Chrome, Safari, Edge */
+.value-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 10px; /* 横幅 */
+    height: 24px; /* 縦幅 */
+    background: #a0aec0; /* 色 */
+    border-radius: 3px; /* 角丸 */
+    cursor: pointer;
+}
+/* Firefox */
+.value-slider::-moz-range-thumb {
+    width: 10px;
+    height: 24px;
+    background: #a0aec0;
+    border-radius: 3px;
+    cursor: pointer;
+    border: none;
 }
 /* ▲▲▲ ここまで ▲▲▲ */
-
-
 /* ▼▼▼ 素材アイテムのスタイル（一部調整） ▼▼▼ */
 .material-item {
     display: flex;
@@ -403,6 +430,19 @@ body {
     
     .mora-display {
     font-size: 0.9rem;
+    }
+
+    .value-adjuster {
+        gap: 5px; /* スマホでは隙間を少し詰める */
+    }
+    
+    .btn-step {
+        width: 30px;
+    }
+    
+    .material-item .value-adjuster {
+        width: 100%; /* 素材カウンターは横幅いっぱい使う */
+        justify-content: space-between;
     }
 }
 
