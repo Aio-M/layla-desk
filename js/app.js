@@ -194,7 +194,6 @@ function displaySelectedCharacters(allCharacters) {
             if(window.confirm("このキャラクターを計画から削除しますか？")) {
                 selectedCharacters = selectedCharacters.filter(c => c.id !== charId);
                 saveSelection();
-                document.getElementById('planning-board').innerHTML = '';
                 loadPlanningPage();
             }
         });
