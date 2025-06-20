@@ -176,7 +176,9 @@ async function loadPlanningPage() {
         <a href="characters.html" class="back-button">キャラクター選択に戻る</a>
     `;
 
-    // ★ データをグローバル変数に格納するように修正
+    console.log("---デバッグ開始---");
+    console.log("読み込んだ allMaterialsData:", allMaterialsData); // ★ログ1
+
     const [charRes, ascRes, levelRes] = await Promise.all([
         fetch('data/characters.json'),
         fetch('data/ascension.json'),
@@ -187,7 +189,7 @@ async function loadPlanningPage() {
     allLevelCosts = await levelRes.json();
 
     displaySelectedCharacters();
-    displayRequiredMaterials(); // 引数が不要に
+    displayRequiredMaterials();
 }
 
 function displaySelectedCharacters() {
@@ -236,13 +238,22 @@ function displayRequiredMaterials() {
     const listElement = document.getElementById('materials-list');
     listElement.innerHTML = '';
     const totalRequired = calculateTotalMaterials();
+    
+    console.log("計算された必要素材:", totalRequired); // ★ログ2
 
-    // allMaterialsData はグローバル変数
     for (const materialId in totalRequired) {
         const totalNeeded = totalRequired[materialId];
         if (totalNeeded === 0) continue;
+        
         const materialInfo = allMaterialsData[materialId];
-        if (!materialInfo) continue;
+        
+        console.log(`処理中の素材: ${materialId}, 紐づく情報:`, materialInfo); // ★ログ3
+        
+        if (!materialInfo) {
+            console.error(`警告: ${materialId} の情報が materials.js に見つかりません。`); // ★ログ4
+            continue;
+        }
+
         const currentAmount = materialInventory[materialId] || 0;
         const item = document.createElement('div');
         item.className = 'material-item';
@@ -300,7 +311,7 @@ function calculateTotalMaterials() {
         const currentExp = expData.find(e => e.level === charPlan.currentLvl)?.exp || 0;
         const requiredExp = targetExp - currentExp;
         if (requiredExp > 0) {
-            total.mora += requiredExp * allLevelCosts.mora_per_exp;
+            total.mora += Math.ceil(requiredExp * allLevelCosts.mora_per_exp);
             const heroWitExp = allLevelCosts.exp_books.hero_wit;
             const requiredBooks = Math.ceil(requiredExp / heroWitExp);
             if (!total.hero_wit) total.hero_wit = 0;
@@ -311,25 +322,33 @@ function calculateTotalMaterials() {
         const rarityKey = `rarity_${charData.rarity}`;
         if (!allAscensionCosts[rarityKey]) return;
         const ascensionPhases = allAscensionCosts[rarityKey].phases;
+
         ascensionPhases.forEach(phase => {
             if (charPlan.currentLvl < phase.level && charPlan.targetLvl >= phase.level) {
                 for (const matType in phase.cost) {
                     let materialId = '';
                     const amount = phase.cost[matType];
+                    
                     if (matType === 'mora') {
                         total.mora += amount;
-                    } else {
-                        if (matType === 'boss_material') materialId = charData.materials.boss;
-                        else if (matType === 'local_specialty') materialId = charData.materials.local;
-                        else if (matType.startsWith('gem_')) materialId = `${charData.materials.gem}_${matType.split('_')[1]}`;
-                        else if (matType.startsWith('common_')) {
-                            const family = commonMaterialFamilies[charData.materials.common];
-                            if (family) materialId = family[parseInt(matType.split('_')[1], 10) - 1];
+                        continue;
+                    } else if (matType === 'boss_material') {
+                        materialId = charData.materials.boss;
+                    } else if (matType === 'local_specialty') {
+                        materialId = charData.materials.local;
+                    } else if (matType.startsWith('gem_')) {
+                        materialId = `${charData.materials.gem}_${matType.split('_')[1]}`;
+                    } else if (matType.startsWith('common_')) {
+                        const family = commonMaterialFamilies[charData.materials.common];
+                        if (family) {
+                            const tierIndex = parseInt(matType.split('_')[1], 10) - 1;
+                            materialId = family[tierIndex];
                         }
-                        if (materialId) {
-                            if (!total[materialId]) total[materialId] = 0;
-                            total[materialId] += amount;
-                        }
+                    }
+                    
+                    if (materialId) {
+                        if (!total[materialId]) total[materialId] = 0;
+                        total[materialId] += amount;
                     }
                 }
             }
@@ -338,13 +357,14 @@ function calculateTotalMaterials() {
     return total;
 }
 
-// ★ updateCharacterLevelOnPlan の再描画ロジックを修正
 function updateCharacterLevelOnPlan(charId, value, isAbsolute = false) {
     const charIndex = selectedCharacters.findIndex(c => c.id === charId);
     if (charIndex > -1) {
         let newLevel = isAbsolute ? value : selectedCharacters[charIndex].currentLvl + value;
         if (newLevel < 1) newLevel = 1;
-        if (newLevel > selectedCharacters[charIndex].targetLvl) newLevel = selectedCharacters[charIndex].targetLvl;
+        if (newLevel > selectedCharacters[charIndex].targetLvl) {
+            newLevel = selectedCharacters[charIndex].targetLvl;
+        }
         selectedCharacters[charIndex].currentLvl = newLevel;
         saveSelection();
         document.getElementById(`current-lvl-display-${charId}`).textContent = newLevel;
