@@ -2,18 +2,19 @@
 let selectedCharacters = []; 
 let materialInventory = {};
 let allCharacterData = [];
-let allAscensionCosts = {}; // ★追加：突破コストデータを保持
+let allAscensionCosts = {};
 let currentSortOrder = 'default';
 let currentlyEditingCharId = null;
-let debounceTimer; // ★追加：デバウンス用のタイマー
+let debounceTimer;
 
 // -- イベントリスナー --
 document.addEventListener('DOMContentLoaded', () => {
     handleActiveNavLinks();
     if (document.getElementById('character-list')) {
-        loadCharacters().then(() => { // ★データ読み込み完了後に選択状態を反映
+        // データ読み込みを先に行う
+        loadCharacters().then(() => {
             loadSelection();
-            renderCharacters(); // 選択状態をカードに反映して再描画
+            renderCharacters(); // 選択状態を反映して再描画
         });
         setupSortButtons();
         setupModalEventListeners();
@@ -181,7 +182,7 @@ async function loadPlanningPage() {
         <a href="characters.html" class="back-button">キャラクター選択に戻る</a>
     `;
 
-    // ★ データをグローバル変数に格納
+    // データをグローバル変数に格納
     const [charRes, ascRes] = await Promise.all([
         fetch('data/characters.json'),
         fetch('data/ascension.json')
@@ -214,7 +215,7 @@ function displaySelectedCharacters() {
                         <button class="btn-step" data-id="${charData.id}" data-amount="-10">--</button>
                         <button class="btn-step" data-id="${charData.id}" data-amount="-1">-</button>
                         <input type="range" class="value-slider" id="slider-char-level-${charData.id}"
-                               min="1" max="${obj.targetLvl}" value="${obj.currentLvl}" data-id="${charData.id}">
+                               min="1" max="${obj.targetLvl}" value="${obj.currentLvl}" data-id="${charData.id}" data-type="char-level">
                         <button class="btn-step" data-id="${charData.id}" data-amount="1">+</button>
                         <button class="btn-step" data-id="${charData.id}" data-amount="10">++</button>
                     </div>
@@ -223,12 +224,12 @@ function displaySelectedCharacters() {
         }
     });
 
-    listElement.querySelectorAll('.btn-step').forEach(button => {
+    listElement.querySelectorAll('.btn-step[data-type="char-level"]').forEach(button => {
         button.addEventListener('click', (e) => {
             updateCharacterLevelOnPlan(e.target.dataset.id, parseInt(e.target.dataset.amount, 10));
         });
     });
-    listElement.querySelectorAll('.value-slider').forEach(slider => {
+    listElement.querySelectorAll('.value-slider[data-type="char-level"]').forEach(slider => {
         slider.addEventListener('input', (e) => {
             updateCharacterLevelOnPlan(e.target.dataset.id, parseInt(e.target.value, 10), true);
         });
@@ -243,8 +244,11 @@ function displayRequiredMaterials() {
     for (const materialId in totalRequired) {
         const totalNeeded = totalRequired[materialId];
         if (totalNeeded === 0) continue;
+        
+        // allMaterialsData はグローバル変数として直接参照
         const materialInfo = allMaterialsData[materialId];
         if (!materialInfo) continue;
+
         const currentAmount = materialInventory[materialId] || 0;
         const item = document.createElement('div');
         item.className = 'material-item';
@@ -267,7 +271,7 @@ function displayRequiredMaterials() {
                     <button class="btn-step" data-id="${materialId}" data-amount="-10">--</button>
                     <button class="btn-step" data-id="${materialId}" data-amount="-1">-</button>
                     <input type="range" class="value-slider" id="slider-material-${materialId}"
-                           min="0" max="${totalNeeded}" value="${currentAmount}" data-id="${materialId}">
+                           min="0" max="${totalNeeded}" value="${currentAmount}" data-id="${materialId}" data-type="material">
                     <button class="btn-step" data-id="${materialId}" data-amount="1">+</button>
                     <button class="btn-step" data-id="${materialId}" data-amount="10">++</button>
                 </div>`;
@@ -328,7 +332,9 @@ function updateCharacterLevelOnPlan(charId, value, isAbsolute = false) {
     if (charIndex > -1) {
         let newLevel = isAbsolute ? value : selectedCharacters[charIndex].currentLvl + value;
         if (newLevel < 1) newLevel = 1;
-        if (newLevel > selectedCharacters[charIndex].targetLvl) newLevel = selectedCharacters[charIndex].targetLvl;
+        if (newLevel > selectedCharacters[charIndex].targetLvl) {
+            newLevel = selectedCharacters[charIndex].targetLvl;
+        }
         selectedCharacters[charIndex].currentLvl = newLevel;
         saveSelection();
         document.getElementById(`current-lvl-display-${charId}`).textContent = newLevel;
@@ -349,7 +355,6 @@ function updateInventory(materialId, value, isAbsolute = false) {
     if (sliderElement) sliderElement.value = newValue;
 }
 
-// ★ debounce関数の定義を移動
 function debounce(func, delay) {
     return function(...args) {
         clearTimeout(debounceTimer);
