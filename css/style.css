@@ -102,6 +102,7 @@ body {
 }
 
 .character-info {
+    /* display: none; が残っている場合は削除し、以下のスタイルにする */
     padding-top: 10px;
 }
 
@@ -115,7 +116,6 @@ body {
     text-overflow: ellipsis;
 }
 
-/* ▼▼▼ 新しく追加するレベル入力欄のスタイル ▼▼▼ */
 .level-inputs {
     display: flex;
     justify-content: space-around;
@@ -137,37 +137,6 @@ body {
     border-radius: 4px;
     text-align: center;
     padding: 4px;
-}
-/* ▲▲▲ ここまで ▲▲▲ */
-.character-card {
-    background-color: #2d3748;
-    border: 2px solid #4a5568; /* 選択状態が分かりやすいように少し太く */
-    border-radius: 8px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    /* カード内のテキストを非表示に */
-    font-size: 0;
-    line-height: 0;
-}
-
-.character-card.selected {
-    border-color: #63b3ed;
-    box-shadow: 0 0 10px rgba(99, 179, 237, 0.5);
-}
-
-.character-card:hover {
-    transform: translateY(-3px);
-}
-
-.character-image {
-    width: 100%;
-    /* 画像を正方形に近づける */
-    height: 75px;
-    object-fit: cover;
-    background-color: #1a202c;
-    /* ホバー時にキャラ名を表示するための準備 */
-    position: relative; 
 }
 
 /* カード内の非表示にした要素を削除 */
