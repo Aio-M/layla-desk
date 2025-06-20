@@ -10,7 +10,10 @@
       "gem": "shivada_jade",
       "boss": "perpetual_caliber",
       "local": "nilotpala_lotus",
-      "common": "divining_scroll"
+      "common": "divining_scroll",
+      "talent_book": "ingenuity",
+      "weekly_boss": "dakas_bell"
+    }
     }
   },
   {
@@ -24,7 +27,9 @@
       "gem": "nagadus_emerald",
       "boss": "quelled_creeper",
       "local": "kalpalata_lotus",
-      "common": "fungal_spores"
+      "common": "fungal_spores",
+      "talent_book": "ingenuity",
+      "weekly_boss": "puppet_strings"
     }
   },
   {
