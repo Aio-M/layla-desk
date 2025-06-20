@@ -118,3 +118,97 @@ body {
     transform: translateY(-3px);
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
 }
+/* === 育成計画ページ === */
+.section {
+    background-color: #2d3748;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.section h3 {
+    margin-top: 0;
+    border-bottom: 2px solid #4a5568;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+#selected-characters-list {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.mini-char-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #4a5568;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.mini-char-card img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.material-item {
+    display: flex;
+    align-items: center;
+    background-color: #4a5568;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.material-name {
+    font-weight: bold;
+    flex-grow: 1; /* 名前がスペースを埋めるように */
+}
+
+.material-total {
+    margin: 0 20px;
+}
+
+.material-counter {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: auto; /* 右寄せにする */
+}
+
+.counter-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background-color: #5a67d8;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+.counter-btn:hover {
+    background-color: #434190;
+}
+
+.current-count {
+    font-size: 1.2rem;
+    min-width: 50px;
+    text-align: center;
+}
+
+.back-button {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    color: #a0aec0;
+    text-decoration: none;
+}
+.back-button:hover {
+    color: #e2e8f0;
+}
