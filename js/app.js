@@ -66,14 +66,14 @@ function renderCharacters() {
         const targetLvl = selectionData ? selectionData.targetLvl : 90;
 
         card.innerHTML = `
-            <img src="<span class="math-inline">\{character\.image\_path\}" alt\="</span>{character.name}" class="character-image">
+            <img src="${character.image_path}" alt="${character.name}" class="character-image">
             <div class="character-info">
-                <h4 class="character-name"><span class="math-inline">\{character\.name\}</h4\>
-<div class\="level\-inputs"\>
-<label\>現在</label\>
-<input type\="number" value\="</span>{currentLvl}" onchange="updateCharacterLevel('<span class="math-inline">\{character\.id\}', 'currentLvl', this\.value\)"\>
-<label\>目標</label\>
-<input type\="number" value\="</span>{targetLvl}" onchange="updateCharacterLevel('${character.id}', 'targetLvl', this.value)">
+                <h4 class="character-name">${character.name}</h4>
+                <div class="level-inputs">
+                    <label>現在</label>
+                    <input type="number" value="${currentLvl}" onchange="updateCharacterLevel('${character.id}', 'currentLvl', this.value)">
+                    <label>目標</label>
+                    <input type="number" value="${targetLvl}" onchange="updateCharacterLevel('${character.id}', 'targetLvl', this.value)">
                 </div>
             </div>
         `;
@@ -157,7 +157,7 @@ function displaySelectedCharacters(allCharacters) {
             const charDisplay = document.createElement('div');
             charDisplay.className = 'mini-char-card';
             // レベル情報も表示（例）
-            charDisplay.innerHTML = `<img src="<span class="math-inline">\{charData\.image\_path\}" alt\="</span>{charData.name}"><span><span class="math-inline">\{charData\.name\} Lv</span>{obj.currentLvl}→${obj.targetLvl}</span>`;
+            charDisplay.innerHTML = `<img src="${charData.image_path}" alt="${charData.name}"><span>${charData.name} Lv${obj.currentLvl}→${obj.targetLvl}</span>`;
             listElement.appendChild(charDisplay);
         }
     });
@@ -179,10 +179,10 @@ function displayRequiredMaterials() {
         item.className = 'material-item';
         item.innerHTML = `
             <span class="material-name">${materialNames[materialId]}</span>
-            <span class="material-total">必要数: <span class="math-inline">\{totalNeeded\.toLocaleString\(\)\}</span\>
-<div class\="material\-counter"\>
-<button class\="counter\-btn" data\-id\="</span>{materialId}" data-amount="-1">-</button>
-                <span class="current-count" id="count-<span class="math-inline">\{materialId\}"\></span>{currentAmount.toLocaleString()}</span>
+            <span class="material-total">必要数: ${totalNeeded.toLocaleString()}</span>
+            <div class="material-counter">
+                <button class="counter-btn" data-id="${materialId}" data-amount="-1">-</button>
+                <span class="current-count" id="count-${materialId}">${currentAmount.toLocaleString()}</span>
                 <button class="counter-btn" data-id="${materialId}" data-amount="1">+</button>
             </div>
         `;
@@ -200,4 +200,31 @@ function displayRequiredMaterials() {
 function updateInventory(materialId, change) {
     if (!materialInventory[materialId]) materialInventory[materialId] = 0;
     materialInventory[materialId] += change;
-    if(materialInventory[materialId]
+    if(materialInventory[materialId] < 0) materialInventory[materialId] = 0;
+    document.getElementById(`count-${materialId}`).textContent = materialInventory[materialId].toLocaleString();
+    saveInventory();
+}
+
+function saveInventory() {
+    localStorage.setItem('laylaDesk_inventory', JSON.stringify(materialInventory));
+}
+
+function loadInventory() {
+    const saved = localStorage.getItem('laylaDesk_inventory');
+    if (saved) {
+        materialInventory = JSON.parse(saved);
+    }
+}
+
+// ===============================
+//  共通機能 (Common Functions)
+// ===============================
+function handleActiveNavLinks() {
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    document.querySelectorAll('.nav-link').forEach(link => {
+        const linkPage = link.getAttribute('href');
+        if (linkPage === currentPage) {
+            link.classList.add('active');
+        }
+    });
+}
