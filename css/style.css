@@ -345,7 +345,7 @@ body {
 .mora-display {
     margin-left: auto;
     font-weight: bold;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
 }
 /* ▲▲▲ ここまで ▲▲▲ */
 
@@ -398,6 +398,10 @@ body {
     }
 
     .material-name {
+    font-size: 0.9rem;
+    }
+    
+    .mora-display {
     font-size: 0.9rem;
     }
 }
