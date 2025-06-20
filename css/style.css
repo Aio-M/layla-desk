@@ -311,12 +311,39 @@ body {
     /* ロゴの文字を少し小さくする */
     .nav-logo {
         font-size: 1.2rem;
+        /* ロゴが縮まないように設定 */
+        flex-shrink: 0;
     }
 
-    /* リンク間の余白を狭くする */
+    /* リンク間の余白を調整し、スクロール設定を追加 */
     .nav-links {
-    gap: 15px; /* スクロールしやすくなるように、少しだけ隙間を戻します */
+        gap: 15px;
+        flex-wrap: nowrap;     /* リンクを折り返さずに、必ず1行で表示する */
+        overflow-x: auto;      /* 横方向にはみ出した場合に、スクロールを有効にする */
+        -webkit-overflow-scrolling: touch; /* iOSで慣性のある滑らかなスクロールを実現 */
+    }
 
+    /* リンクの文字サイズと余白を調整 */
+    .nav-link {
+        font-size: 0.9rem;
+        padding: 5px 10px; /* 左右に少し余白を確保 */
+        /* リンクの文字が潰れないように設定 */
+        white-space: nowrap;
+    }
+
+    /* ホームページカードの文字を調整 */
+    #home-page .nav-card h3 {
+        font-size: 1.5rem;
+    }
+
+    /* スクロールバー自体は非表示にして見た目をスッキリさせる */
+    .nav-links::-webkit-scrollbar {
+        display: none;
+    }
+    .nav-links {
+        scrollbar-width: none; /* Firefox用 */
+    }
+}
     /* ▼▼▼ ここからが重要な追加部分です ▼▼▼ */
     flex-wrap: nowrap;     /* リンクを折り返さずに、必ず1行で表示する */
     overflow-x: auto;      /* 横方向にはみ出した場合に、スクロールを有効にする */
