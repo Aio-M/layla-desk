@@ -22,6 +22,10 @@ async function loadCharacters() {
     const listElement = document.getElementById('character-list');
     try {
         const response = await fetch('data/characters.json');
+        // ネットワークエラーのチェック
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const characters = await response.json();
         listElement.innerHTML = ''; // 「読み込み中」を消去
 
@@ -36,10 +40,10 @@ async function loadCharacters() {
             }
             
             card.innerHTML = `
-                <img src="<span class="math-inline">\{character\.image\_path\}" alt\="</span>{character.name}" class="character-image">
+                <img src="${character.image_path}" alt="${character.name}" class="character-image">
                 <div class="character-info">
-                    <h3 class="character-name"><span class="math-inline">\{character\.name\}</h3\>
-<p class\="character\-meta"\>★</span>{character.rarity} / ${character.element}</p>
+                    <h3 class="character-name">${character.name}</h3>
+                    <p class="character-meta">★${character.rarity} / ${character.element}</p>
                 </div>
             `;
 
@@ -51,8 +55,9 @@ async function loadCharacters() {
             listElement.appendChild(card);
         });
     } catch (error) {
-        console.error('キャラクターデータの読み込みに失敗しました:', error);
-        listElement.innerHTML = '<p>データの読み込みに失敗しました。ページを更新してみてください。</p>';
+        // 途中でエラーが起きたら、メッセージを表示します
+        console.error('キャラクターデータの読み込み、または処理に失敗しました:', error);
+        listElement.innerHTML = '<p style="color: #ffcdd2;">データの読み込みに失敗しました。ファイルパスやJSONファイルの形式を確認してください。</p>';
     }
 }
 
@@ -67,3 +72,28 @@ function toggleCharacterSelection(charId, cardElement) {
     if (selectedCharacters.includes(charId)) {
         // もし既に選択されていたら、配列から削除
         selectedCharacters = selectedCharacters.filter(id => id !== charId);
+    } else {
+        // もし選択されていなかったら、配列に追加
+        selectedCharacters.push(charId);
+    }
+    saveSelection(); // 変更をブラウザに保存
+}
+
+/**
+ * 選択状態をブラウザのLocalStorageに保存する関数
+ */
+function saveSelection() {
+    // 配列をJSON文字列に変換して保存
+    localStorage.setItem('laylaDesk_selectedCharacters', JSON.stringify(selectedCharacters));
+}
+
+/**
+ * LocalStorageから選択状態を読み込む関数
+ */
+function loadSelection() {
+    const savedSelection = localStorage.getItem('laylaDesk_selectedCharacters');
+    if (savedSelection) {
+        // JSON文字列を配列に戻して変数に格納
+        selectedCharacters = JSON.parse(savedSelection);
+    }
+}
