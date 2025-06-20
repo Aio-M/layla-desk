@@ -460,3 +460,9 @@ body {
 .delete-char-btn:hover {
     background-color: #e53e3e;
 }
+
+.material-icon {
+    width: 32px;
+    height: 32px;
+    margin-right: 15px;
+}
