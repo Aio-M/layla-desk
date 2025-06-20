@@ -260,11 +260,19 @@ function displayRequiredMaterials(allCharacters, allMaterials, ascensionCosts) {
 function calculateTotalMaterials(allCharacters, ascensionCosts) {
     const total = {};
 
+    // ▼▼▼ 新しいコモン素材の定義を追加 ▼▼▼
+    const commonMaterialFamilies = {
+        'divining_scroll': ['divining_scroll', 'sealed_scroll', 'forbidden_curse_scroll'],
+        'fungal_spores': ['fungal_spores', 'luminescent_pollen', 'crystalline_cyst_dust']
+    };
+    // ▲▲▲ ここまで ▲▲▲
+
     selectedCharacters.forEach(charPlan => {
         const charData = allCharacters.find(c => c.id === charPlan.id);
         if (!charData || !charData.materials) return;
 
         const rarityKey = `rarity_${charData.rarity}`;
+        if (!ascensionCosts[rarityKey]) return; // レアリティデータがなければスキップ
         const ascensionPhases = ascensionCosts[rarityKey].phases;
 
         ascensionPhases.forEach(phase => {
@@ -280,12 +288,17 @@ function calculateTotalMaterials(allCharacters, ascensionCosts) {
                     } else if (matType === 'local_specialty') {
                         materialId = charData.materials.local;
                     } else if (matType.startsWith('gem_')) {
-                        materialId = `${charData.materials.gem}_${matType.split('_')[1]}`;
+                        materialId = `<span class="math-inline">\{charData\.materials\.gem\}\_</span>{matType.split('_')[1]}`;
                     } else if (matType.startsWith('common_')) {
-                        const commonTiers = { '1': 'fungal_spores', '2': 'luminescent_pollen', '3': 'crystalline_cyst_dust' };
-                        materialId = commonTiers[matType.split('_')[1]];
+                        // ▼▼▼ ここのロジックを更新 ▼▼▼
+                        const family = commonMaterialFamilies[charData.materials.common];
+                        if (family) {
+                            const tierIndex = parseInt(matType.split('_')[1], 10) - 1;
+                            materialId = family[tierIndex];
+                        }
+                        // ▲▲▲ ここまで ▲▲▲
                     }
-                    
+
                     if (materialId) {
                         if (!total[materialId]) total[materialId] = 0;
                         total[materialId] += amount;
@@ -296,7 +309,6 @@ function calculateTotalMaterials(allCharacters, ascensionCosts) {
     });
     return total;
 }
-
 function updateInventory(materialId, change) {
     if (!materialInventory[materialId]) materialInventory[materialId] = 0;
     materialInventory[materialId] += change;
