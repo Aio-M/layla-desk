@@ -44,11 +44,33 @@
     <div id="level-modal" class="modal">
         <h3 id="modal-char-name">キャラクター名</h3>
         <div class="modal-content">
-            <p>現在のレベルと目標レベルを入力してください。</p>
-            <div class="modal-level-inputs">
-                <label for="current-lvl-input">現在レベル</label>
-                <input type="number" id="current-lvl-input" value="1">
-            </div>
+    <div class="modal-section">
+        <h4>キャラクターレベル</h4>
+        <div class="modal-level-inputs">
+            <label for="current-lvl-input">現在レベル</label>
+            <input type="number" id="current-lvl-input" value="1">
+        </div>
+        <div class="modal-level-inputs">
+            <label for="target-lvl-input">目標レベル</label>
+            <input type="number" id="target-lvl-input" value="90">
+        </div>
+    </div>
+    <div class="modal-section">
+        <h4>天賦レベル</h4>
+        <div class="modal-talent-inputs">
+            <span>通常</span>
+            <input type="number" id="talent1-current-input" value="1"> → <input type="number" id="talent1-target-input" value="1">
+        </div>
+        <div class="modal-talent-inputs">
+            <span>スキル</span>
+            <input type="number" id="talent2-current-input" value="1"> → <input type="number" id="talent2-target-input" value="1">
+        </div>
+        <div class="modal-talent-inputs">
+            <span>爆発</span>
+            <input type="number" id="talent3-current-input" value="1"> → <input type="number" id="talent3-target-input" value="1">
+        </div>
+    </div>
+</div>
             <div class="modal-level-inputs">
                 <label for="target-lvl-input">目標レベル</label>
                 <input type="number" id="target-lvl-input" value="90">
