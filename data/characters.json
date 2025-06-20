@@ -15,4 +15,13 @@
     "weapon_type": "法器",
     "image_path": "images/characters/nahida.webp"
   }
+  
+  {
+    "id": "test1",
+    "name": "テスト",
+    "rarity": 5,
+    "element": "無",
+    "weapon_type": "拳",
+    "image_path": "images/characters/test.webp"
+  }
 ]
