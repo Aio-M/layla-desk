@@ -180,15 +180,15 @@ async function loadPlanningPage() {
         <a href="characters.html" class="back-button">キャラクター選択に戻る</a>
     `;
 
-    // 全てのデータベースを非同期で並行して読み込む
-    const [allCharacters, allMaterials, ascensionCosts] = await Promise.all([
+    // ★ fetchのリストからmaterials.jsonを削除
+    const [allCharacters, ascensionCosts] = await Promise.all([
         fetch('data/characters.json').then(res => res.json()),
-        fetch('data/materials.json').then(res => res.json()),
         fetch('data/ascension.json').then(res => res.json())
     ]);
 
     displaySelectedCharacters(allCharacters);
-    displayRequiredMaterials(allCharacters, allMaterials, ascensionCosts);
+    // ★ グローバル変数 allMaterialsData を直接渡すように変更
+    displayRequiredMaterials(allCharacters, allMaterialsData, ascensionCosts);
 }
 
 function displaySelectedCharacters(allCharacters) {
