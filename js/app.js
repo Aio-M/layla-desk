@@ -3,7 +3,8 @@ let selectedCharacters = [];
 let materialInventory = {};
 let allCharacterData = [];
 let allAscensionCosts = {};
-let allLevelCosts = {}; // ★追加：レベルコストデータをグローバルに保持
+let allLevelCosts = {};
+let allTalentCosts = {};
 let currentSortOrder = 'default';
 let currentlyEditingCharId = null;
 let debounceTimer;
@@ -42,24 +43,18 @@ function setupModalEventListeners() {
     removeBtn.addEventListener('click', removeCharacterFromPlan);
 }
 
-// ... (ファイル上部のコードは変更なし)
-
-// ▼▼▼ openLevelModal, saveLevelData, displaySelectedCharacters を更新 ▼▼▼
-
 function openLevelModal(charId) {
     currentlyEditingCharId = charId;
     const charData = allCharacterData.find(c => c.id === charId);
     const selectionData = selectedCharacters.find(c => c.id === charId);
 
     document.getElementById('modal-char-name').textContent = charData.name;
-    // キャラクターレベルの入力値を設定
     document.getElementById('current-lvl-input').value = selectionData ? selectionData.currentLvl : 1;
     document.getElementById('target-lvl-input').value = selectionData ? selectionData.targetLvl : 90;
 
-    // ★天賦レベルの入力値を設定
     for (let i = 1; i <= 3; i++) {
-        document.getElementById(`talent${i}-current-input`).value = selectionData ? selectionData[`talent${i}_current`] : 1;
-        document.getElementById(`talent${i}-target-input`).value = selectionData ? selectionData[`talent${i}_target`] : 1;
+        document.getElementById(`talent${i}-current-input`).value = selectionData ? (selectionData[`talent${i}_current`] || 1) : 1;
+        document.getElementById(`talent${i}-target-input`).value = selectionData ? (selectionData[`talent${i}_target`] || 1) : 1;
     }
 
     document.getElementById('modal-remove-btn').style.display = selectionData ? 'block' : 'none';
@@ -86,13 +81,11 @@ function saveLevelData() {
     };
 
     const existingIndex = selectedCharacters.findIndex(c => c.id === currentlyEditingCharId);
-
     if (existingIndex > -1) {
         selectedCharacters[existingIndex] = newSelection;
     } else {
         selectedCharacters.push(newSelection);
     }
-
     saveSelection();
     renderCharacters();
     closeLevelModal();
@@ -113,6 +106,7 @@ function removeCharacterFromPlan() {
 
 function renderCharacters() {
     const listElement = document.getElementById('character-list');
+    if (!listElement) return;
     listElement.innerHTML = '';
     const sortedCharacters = sortCharacters(allCharacterData, currentSortOrder);
     sortedCharacters.forEach(character => {
@@ -147,7 +141,10 @@ async function loadCharacters() {
         allCharacterData = await response.json();
     } catch (error) {
         console.error('キャラクターデータの読み込みに失敗しました:', error);
-        document.getElementById('character-list').innerHTML = '<p style="color: #ffcdd2;">データの読み込みに失敗しました。</p>';
+        const listElement = document.getElementById('character-list');
+        if (listElement) {
+            listElement.innerHTML = '<p style="color: #ffcdd2;">データの読み込みに失敗しました。</p>';
+        }
     }
 }
 
@@ -160,7 +157,7 @@ function sortCharacters(characters, sortBy) {
         case 'weapon':
             return [...characters].sort((a, b) => weaponOrder.indexOf(a.weapon_type) - weaponOrder.indexOf(b.weapon_type));
         default:
-            return characters;
+            return [...characters];
     }
 }
 
@@ -171,7 +168,12 @@ function saveSelection() {
 function loadSelection() {
     const saved = localStorage.getItem('laylaDesk_selectedCharacters');
     if (saved) {
-        selectedCharacters = JSON.parse(saved);
+        try {
+            selectedCharacters = JSON.parse(saved);
+        } catch(e) {
+            console.error("保存された選択データの読み込みに失敗しました:", e);
+            selectedCharacters = [];
+        }
     }
 }
 
@@ -200,17 +202,16 @@ async function loadPlanningPage() {
         <a href="characters.html" class="back-button">キャラクター選択に戻る</a>
     `;
 
-    console.log("---デバッグ開始---");
-    console.log("読み込んだ allMaterialsData:", allMaterialsData); // ★ログ1
-
-    const [charRes, ascRes, levelRes] = await Promise.all([
+    const [charRes, ascRes, levelRes, talentRes] = await Promise.all([
         fetch('data/characters.json'),
         fetch('data/ascension.json'),
-        fetch('data/level_costs.json')
+        fetch('data/level_costs.json'),
+        fetch('data/talent_costs.json')
     ]);
     allCharacterData = await charRes.json();
     allAscensionCosts = await ascRes.json();
     allLevelCosts = await levelRes.json();
+    allTalentCosts = await talentRes.json();
 
     displaySelectedCharacters();
     displayRequiredMaterials();
@@ -221,19 +222,18 @@ function displaySelectedCharacters() {
     listElement.innerHTML = '';
     selectedCharacters.forEach(obj => {
         const charData = allCharacterData.find(c => c.id === obj.id);
-        if(charData) {
+        if (charData) {
             const item = document.createElement('div');
             item.className = 'plan-char-item';
-            // ★天賦レベルも表示するように変更
             item.innerHTML = `
-                <img src="<span class="math-inline">\{charData\.image\_path\}" alt\="</span>{charData.name}">
+                <img src="${charData.image_path}" alt="${charData.name}">
                 <div class="plan-char-details">
                     <div class="plan-char-info">
                         <span class="plan-char-name">${charData.name}</span>
-                        <span class="plan-char-level-display">Lv <span class="math-inline">\{obj\.currentLvl\}→</span>{obj.targetLvl}</span>
+                        <span class="plan-char-level-display">Lv ${obj.currentLvl}→${obj.targetLvl}</span>
                     </div>
                     <div class="plan-char-talents-display">
-                        天賦: <span class="math-inline">\{obj\.talent1\_current\}→</span>{obj.talent1_target} / <span class="math-inline">\{obj\.talent2\_current\}→</span>{obj.talent2_target} / <span class="math-inline">\{obj\.talent3\_current\}→</span>{obj.targetLvl}
+                        天賦: ${obj.talent1_current}→${obj.talent1_target} / ${obj.talent2_current}→${obj.talent2_target} / ${obj.talent3_current}→${obj.talent3_target}
                     </div>
                 </div>
                 <button class="delete-char-btn" data-id="${charData.id}">×</button>
@@ -241,52 +241,51 @@ function displaySelectedCharacters() {
             listElement.appendChild(item);
         }
     });
-    // (削除ボタンのイベントリスナーは変更なし)
+
+    listElement.querySelectorAll('.delete-char-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            if (window.confirm("このキャラクターを計画から削除しますか？")) {
+                selectedCharacters = selectedCharacters.filter(c => c.id !== e.target.dataset.id);
+                saveSelection();
+                loadPlanningPage();
+            }
+        });
+    });
 }
 
 function displayRequiredMaterials() {
     const listElement = document.getElementById('materials-list');
     listElement.innerHTML = '';
     const totalRequired = calculateTotalMaterials();
-    
-    console.log("計算された必要素材:", totalRequired); // ★ログ2
-
     for (const materialId in totalRequired) {
-        const totalNeeded = totalRequired[materialId];
-        if (totalNeeded === 0) continue;
-        
+        if (totalRequired[materialId] <= 0) continue;
         const materialInfo = allMaterialsData[materialId];
-        
-        console.log(`処理中の素材: ${materialId}, 紐づく情報:`, materialInfo); // ★ログ3
-        
         if (!materialInfo) {
-            console.error(`警告: ${materialId} の情報が materials.js に見つかりません。`); // ★ログ4
-            continue;
+             console.error(`警告: ${materialId} の情報が materials.js に見つかりません。`);
+             continue;
         }
-
         const currentAmount = materialInventory[materialId] || 0;
         const item = document.createElement('div');
         item.className = 'material-item';
-
         if (materialId === 'mora') {
             item.innerHTML = `
                 <img src="${materialInfo.icon}" alt="${materialInfo.name}" class="material-icon">
                 <div class="material-info"><div class="material-name">${materialInfo.name}</div></div>
-                <div class="mora-display">必要数: ${totalNeeded.toLocaleString()}</div>`;
+                <div class="mora-display">必要数: ${totalRequired[materialId].toLocaleString()}</div>`;
         } else {
             item.innerHTML = `
                 <img src="${materialInfo.icon}" alt="${materialInfo.name}" class="material-icon">
                 <div class="material-info">
                     <div class="material-name">${materialInfo.name}</div>
                     <div class="material-amount-display">
-                        <span id="current-mat-display-${materialId}">${currentAmount.toLocaleString()}</span> / ${totalNeeded.toLocaleString()}
+                        <span id="current-mat-display-${materialId}">${currentAmount.toLocaleString()}</span> / ${totalRequired[materialId].toLocaleString()}
                     </div>
                 </div>
                 <div class="value-adjuster">
                     <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="-10">--</button>
                     <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="-1">-</button>
                     <input type="range" class="value-slider" id="slider-material-${materialId}"
-                           min="0" max="${totalNeeded}" value="${currentAmount}" data-id="${materialId}" data-type="material">
+                           min="0" max="${totalRequired[materialId]}" value="${currentAmount}" data-id="${materialId}" data-type="material">
                     <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="1">+</button>
                     <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="10">++</button>
                 </div>`;
@@ -312,6 +311,10 @@ function calculateTotalMaterials() {
         'divining_scroll': ['divining_scroll', 'sealed_scroll', 'forbidden_curse_scroll'],
         'fungal_spores': ['fungal_spores', 'luminescent_pollen', 'crystalline_cyst_dust']
     };
+    const talentBookFamilies = {
+        'ingenuity': ['teachings_of_ingenuity', 'guide_to_ingenuity', 'philosophies_of_ingenuity']
+    };
+
     selectedCharacters.forEach(charPlan => {
         const charData = allCharacterData.find(c => c.id === charPlan.id);
         if (!charData) return;
@@ -322,47 +325,67 @@ function calculateTotalMaterials() {
         const requiredExp = targetExp - currentExp;
         if (requiredExp > 0) {
             total.mora += Math.ceil(requiredExp * allLevelCosts.mora_per_exp);
-            const heroWitExp = allLevelCosts.exp_books.hero_wit;
-            const requiredBooks = Math.ceil(requiredExp / heroWitExp);
             if (!total.hero_wit) total.hero_wit = 0;
-            total.hero_wit += requiredBooks;
+            total.hero_wit += Math.ceil(requiredExp / allLevelCosts.exp_books.hero_wit);
         }
 
-        if (!charData.materials) return;
-        const rarityKey = `rarity_${charData.rarity}`;
-        if (!allAscensionCosts[rarityKey]) return;
-        const ascensionPhases = allAscensionCosts[rarityKey].phases;
-
-        ascensionPhases.forEach(phase => {
-            if (charPlan.currentLvl < phase.level && charPlan.targetLvl >= phase.level) {
-                for (const matType in phase.cost) {
-                    let materialId = '';
-                    const amount = phase.cost[matType];
-                    
-                    if (matType === 'mora') {
-                        total.mora += amount;
-                        continue;
-                    } else if (matType === 'boss_material') {
-                        materialId = charData.materials.boss;
-                    } else if (matType === 'local_specialty') {
-                        materialId = charData.materials.local;
-                    } else if (matType.startsWith('gem_')) {
-                        materialId = `${charData.materials.gem}_${matType.split('_')[1]}`;
-                    } else if (matType.startsWith('common_')) {
-                        const family = commonMaterialFamilies[charData.materials.common];
-                        if (family) {
-                            const tierIndex = parseInt(matType.split('_')[1], 10) - 1;
-                            materialId = family[tierIndex];
+        if (charData.materials) {
+            const ascPhases = allAscensionCosts[`rarity_${charData.rarity}`].phases;
+            ascPhases.forEach(p => {
+                if (charPlan.currentLvl < p.level && charPlan.targetLvl >= p.level) {
+                    for (const matType in p.cost) {
+                        let materialId = '';
+                        const amount = p.cost[matType];
+                        if (matType === 'mora') total.mora += amount;
+                        else {
+                            if (matType === 'boss_material') materialId = charData.materials.boss;
+                            else if (matType === 'local_specialty') materialId = charData.materials.local;
+                            else if (matType.startsWith('gem_')) materialId = `${charData.materials.gem}_${matType.split('_')[1]}`;
+                            else if (matType.startsWith('common_')) {
+                                const family = commonMaterialFamilies[charData.materials.common];
+                                if (family) materialId = family[parseInt(matType.split('_')[1], 10) - 1];
+                            }
+                            if (materialId) {
+                                if (!total[materialId]) total[materialId] = 0;
+                                total[materialId] += amount;
+                            }
                         }
                     }
-                    
-                    if (materialId) {
-                        if (!total[materialId]) total[materialId] = 0;
-                        total[materialId] += amount;
+                }
+            });
+        }
+
+        if (charData.materials) {
+            const talentLevels = allTalentCosts.levels;
+            for (let i = 1; i <= 3; i++) {
+                const currentTalent = charPlan[`talent${i}_current`] || 1;
+                const targetTalent = charPlan[`talent${i}_target`] || 1;
+                for (let lv = currentTalent; lv < targetTalent; lv++) {
+                    const phase = talentLevels.find(p => p.level === lv + 1);
+                    if (!phase) continue;
+                    for (const matType in phase.cost) {
+                        let materialId = '';
+                        const amount = phase.cost[matType];
+                        if (matType === 'mora') total.mora += amount;
+                        else {
+                            if (matType === 'weekly_boss') materialId = charData.materials.weekly_boss;
+                            else if (matType === 'crown') materialId = 'crown_of_insight';
+                            else if (matType.startsWith('book_')) {
+                                const family = talentBookFamilies[charData.materials.talent_book];
+                                if (family) materialId = family[parseInt(matType.split('_')[1], 10) - 2];
+                            } else if (matType.startsWith('common_')) {
+                                const family = commonMaterialFamilies[charData.materials.common];
+                                if (family) materialId = family[parseInt(matType.split('_')[1], 10) - 1];
+                            }
+                            if (materialId) {
+                                if (!total[materialId]) total[materialId] = 0;
+                                total[materialId] += amount;
+                            }
+                        }
                     }
                 }
             }
-        });
+        }
     });
     return total;
 }
@@ -396,9 +419,9 @@ function updateInventory(materialId, value, isAbsolute = false) {
 }
 
 function debounce(func, delay) {
-    return function(...args) {
+    return function() {
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => func.apply(this, args), delay);
+        debounceTimer = setTimeout(() => func.apply(this, arguments), delay);
     };
 }
 
@@ -409,7 +432,12 @@ function saveInventory() {
 function loadInventory() {
     const saved = localStorage.getItem('laylaDesk_inventory');
     if (saved) {
-        materialInventory = JSON.parse(saved);
+        try {
+            materialInventory = JSON.parse(saved);
+        } catch(e) {
+            console.error("保存された所持数データの読み込みに失敗しました:", e);
+            materialInventory = {};
+        }
     }
 }
 
