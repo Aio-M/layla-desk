@@ -239,15 +239,23 @@ function displaySelectedCharacters() {
         if (charData) {
             const item = document.createElement('div');
             item.className = 'plan-char-item';
+            // ▼▼▼ ボタンとスライダー、レベル表記を修正 ▼▼▼
             item.innerHTML = `
                 <img src="${charData.image_path}" alt="${charData.name}">
                 <div class="plan-char-details">
                     <div class="plan-char-info">
                         <span class="plan-char-name">${charData.name}</span>
-                        <span class="plan-char-level-display">Lv ${obj.currentLvl}→${obj.targetLvl}</span>
+                        <span class="plan-char-level-display">
+                            Lv <span id="current-lvl-display-${charData.id}">${obj.currentLvl}</span> / ${obj.targetLvl}
+                        </span>
                     </div>
-                    <div class="plan-char-talents-display">
-                        天賦: ${obj.talent1_current}→${obj.talent1_target} / ${obj.talent2_current}→${obj.talent2_target} / ${obj.talent3_current}→${obj.talent3_target}
+                    <div class="value-adjuster">
+                        <button class="btn-step" data-id="${charData.id}" data-type="char-level" data-amount="-10">--</button>
+                        <button class="btn-step" data-id="${charData.id}" data-type="char-level" data-amount="-1">-</button>
+                        <input type="range" class="value-slider" id="slider-char-level-${charData.id}"
+                               min="1" max="${obj.targetLvl}" value="${obj.currentLvl}" data-id="${charData.id}" data-type="char-level">
+                        <button class="btn-step" data-id="${charData.id}" data-type="char-level" data-amount="1">+</button>
+                        <button class="btn-step" data-id="${charData.id}" data-type="char-level" data-amount="10">++</button>
                     </div>
                 </div>
                 <button class="delete-char-btn" data-id="${charData.id}">×</button>
@@ -265,9 +273,19 @@ function displaySelectedCharacters() {
             }
         });
     });
+
+    listElement.querySelectorAll('.btn-step[data-type="char-level"]').forEach(button => {
+        button.addEventListener('click', (e) => {
+            updateCharacterLevelOnPlan(e.target.dataset.id, parseInt(e.target.dataset.amount, 10));
+        });
+    });
+    listElement.querySelectorAll('.value-slider[data-type="char-level"]').forEach(slider => {
+        slider.addEventListener('input', (e) => {
+            updateCharacterLevelOnPlan(e.target.dataset.id, parseInt(e.target.value, 10), true);
+        });
+    });
 }
 
-// ▼▼▼ この関数を、ボタンとスライダーが表示される正しいバージョンに戻します ▼▼▼
 function displayRequiredMaterials() {
     const listElement = document.getElementById('materials-list');
     listElement.innerHTML = '';
@@ -288,6 +306,7 @@ function displayRequiredMaterials() {
                 <div class="material-info"><div class="material-name">${materialInfo.name}</div></div>
                 <div class="mora-display">必要数: ${totalRequired[materialId].toLocaleString()}</div>`;
         } else {
+            // ▼▼▼ ボタンとスライダーを再実装 ▼▼▼
             item.innerHTML = `
                 <img src="${materialInfo.icon}" alt="${materialInfo.name}" class="material-icon">
                 <div class="material-info">
@@ -405,8 +424,9 @@ function calculateTotalMaterials() {
     return total;
 }
 
+// ▼▼▼ リアルタイム再計算のロジックを再実装 ▼▼▼
 function updateCharacterLevelOnPlan(charId, value, isAbsolute = false) {
-    const charIndex = seletedCharacters.findIndex(c => c.id === charId);
+    const charIndex = selectedCharacters.findIndex(c => c.id === charId);
     if (charIndex > -1) {
         let newLevel = isAbsolute ? value : selectedCharacters[charIndex].currentLvl + value;
         if (newLevel < 1) newLevel = 1;
