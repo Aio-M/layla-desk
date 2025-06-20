@@ -5,9 +5,9 @@ let allCharacterData = []; // 全キャラクターデータを保持する配�
 let currentSortOrder = 'default'; // 現在のソート順
 
 // -- イベントリスナー --
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => { handleActiveNavLinks();
     // キャラクター選択ページの処理
-    if (document.getElementById('character-list')) {
+    if (document.getElementById('character-list')) { loadSelection();
         loadSelection();
         setupSortButtons(); // ソートボタンの準備
         loadCharacters();
@@ -179,4 +179,17 @@ function loadInventory() {
     if (saved) {
         materialInventory = JSON.parse(saved);
     }
+}
+
+// ===============================
+//  共通機能 (Common Functions)
+// ===============================
+function handleActiveNavLinks() {
+    const currentPage = window.location.pathname.split('/').pop();
+    document.querySelectorAll('.nav-link').forEach(link => {
+        const linkPage = link.getAttribute('href');
+        if (linkPage === currentPage) {
+            link.classList.add('active');
+        }
+    });
 }
