@@ -8,180 +8,38 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4f46e5">
 </head>
-<body>
+
+<body id="home-page">
+
     <div class="container">
-        <div class="hero-section">
-            <div class="logo">🌙</div>
-            <h1 class="title">Layla Desk</h1>
-            <p class="subtitle">
-                原神の育成計画を効率的に管理する<br>
-                あなた専用のデスクトップツール
-            </p>
-            <div class="version">Version 1.0</div>
-        </div>
 
-        <div class="nav-buttons">
-            <a href="characters.html" class="nav-card">
-                <span class="nav-card-icon">🧙‍♀️</span>
-                <h2 class="nav-card-title">キャラクター・武器選択</h2>
-                <p class="nav-card-description">
-                    育成したいキャラクターと武器を選んで、目標レベルを設定しましょう
-                </p>
-            </a>
-
-            <a href="planning.html" class="nav-card">
-                <span class="nav-card-icon">📊</span>
-                <h2 class="nav-card-title">育成計画</h2>
-                <p class="nav-card-description">
-                    必要な素材を確認して、効率的な育成スケジュールを立てましょう
-                </p>
-            </a>
-        </div>
-
-        <div class="features-section">
-            <h2 class="features-title">✨ 主な機能</h2>
-            <div class="features-grid">
-                <div class="feature-item">
-                    <span class="feature-icon">📱</span>
-                    <h3 class="feature-title">オフライン対応</h3>
-                    <p class="feature-description">
-                        インターネット接続なしでも使用可能。データはローカルに安全保存。
-                    </p>
+        <header class="header">
+            <nav class="nav-bar">
+                <a class="nav-logo" href="index.html">🌙 Layla Desk</a>
+                <div class="nav-links">
+                    <a class="nav-link" href="index.html">ホーム</a>
+                    <a class="nav-link" href="characters.html">キャラクター</a>
+                    <a class="nav-link" href="planning.html">育成計画</a>
                 </div>
-                
-                <div class="feature-item">
-                    <span class="feature-icon">🔄</span>
-                    <h3 class="feature-title">自動計算</h3>
-                    <p class="feature-description">
-                        キャラクターと武器のレベルに応じて、必要素材を自動で計算。
-                    </p>
-                </div>
-                
-                <div class="feature-item">
-                    <span class="feature-icon">📦</span>
-                    <h3 class="feature-title">素材管理</h3>
-                    <p class="feature-description">
-                        現在の所持数を記録して、不足分を一目で確認できます。
-                    </p>
-                </div>
-                
-                <div class="feature-item">
-                    <span class="feature-icon">🎯</span>
-                    <h3 class="feature-title">効率的な計画</h3>
-                    <p class="feature-description">
-                        複数キャラクターの同時育成も考慮した最適な計画を提案。
-                    </p>
-                </div>
+            </nav>
+        </header>
+        <main>
+            <h2 class="page-title">ようこそ！</h2>
+            <div class="card-grid">
+                <a href="characters.html" class="nav-card">
+                    <h3>📝 育成計画を立てる</h3>
+                    <p>キャラクターや武器を選択し、必要な素材をリストアップします。</p>
+                </a>
+                <a href="planning.html" class="nav-card">
+                    <h3>📊 計画を確認する</h3>
+                    <p>現在進行中の育成計画と、素材の所持数を確認します。</p>
+                </a>
             </div>
-        </div>
+        </main>
 
-        <div class="footer">
-            <p>🌟 旅人の冒険をサポートします 🌟</p>
-            <p>Made with ❤️ for Genshin Impact players</p>
-        </div>
     </div>
 
-    <!-- PWAインストール促進バナー -->
-    <div id="installBanner" class="install-banner">
-        📱 アプリとしてインストールできます
-        <button onclick="installApp()">インストール</button>
-        <button onclick="hideInstallBanner()" style="background: transparent; color: white; border: 1px solid white;">後で</button>
-    </div>
-
-    <script>
-        // PWA関連の変数
-        let deferredPrompt;
-        const installBanner = document.getElementById('installBanner');
-
-        // PWAインストール可能時のイベント
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            
-            // モバイルデバイスの場合のみバナーを表示
-            if (window.innerWidth <= 768) {
-                setTimeout(() => {
-                    installBanner.classList.add('show');
-                }, 3000);
-            }
-        });
-
-        // アプリインストール実行
-        function installApp() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('PWAがインストールされました');
-                    }
-                    deferredPrompt = null;
-                    hideInstallBanner();
-                });
-            }
-        }
-
-        // インストールバナーを非表示
-        function hideInstallBanner() {
-            installBanner.classList.remove('show');
-            // 1日後まで再表示しない
-            localStorage.setItem('installBannerHidden', Date.now());
-        }
-
-        // ページ読み込み時の処理
-        document.addEventListener('DOMContentLoaded', () => {
-            // バナー非表示の確認
-            const hiddenTime = localStorage.getItem('installBannerHidden');
-            if (hiddenTime && Date.now() - hiddenTime < 24 * 60 * 60 * 1000) {
-                return; // 24時間以内なら表示しない
-            }
-
-            // アニメーション遅延実行
-            setTimeout(() => {
-                document.body.style.opacity = '1';
-            }, 100);
-        });
-
-        // Service Worker登録
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(registration => {
-                        console.log('Service Worker registered successfully');
-                    })
-                    .catch(error => {
-                        console.log('Service Worker registration failed:', error);
-                    });
-            });
-        }
-
-        // ページ遷移時のアニメーション
-        document.querySelectorAll('.nav-card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                e.preventDefault();
-                const href = card.getAttribute('href');
-                
-                // フェードアウトアニメーション
-                document.body.style.transition = 'opacity 0.3s ease';
-                document.body.style.opacity = '0';
-                
-                setTimeout(() => {
-                    window.location.href = href;
-                }, 300);
-            });
-        });
-    </script>
-    <script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/layla-desk/sw.js')
-                .then(registration => {
-                    console.log('Service Worker registered: ', registration);
-                })
-                .catch(error => {
-                    console.log('Service Worker registration failed: ', error);
-                });
-        });
-    }
-    </script>
+    <script src="js/app.js"></script>
+    
 </body>
 </html>
