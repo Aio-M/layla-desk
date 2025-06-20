@@ -1,0 +1,13 @@
+{
+  "levels": [
+    { "level": 2, "cost": { "mora": 12500, "book_2": 3, "common_1": 6 } },
+    { "level": 3, "cost": { "mora": 17500, "book_3": 2, "common_2": 3 } },
+    { "level": 4, "cost": { "mora": 25000, "book_3": 4, "common_2": 4 } },
+    { "level": 5, "cost": { "mora": 30000, "book_3": 6, "common_2": 6 } },
+    { "level": 6, "cost": { "mora": 37500, "book_3": 9, "common_2": 9 } },
+    { "level": 7, "cost": { "mora": 120000, "book_4": 4, "common_3": 4, "weekly_boss": 1 } },
+    { "level": 8, "cost": { "mora": 260000, "book_4": 6, "common_3": 6, "weekly_boss": 1 } },
+    { "level": 9, "cost": { "mora": 450000, "book_4": 12, "common_3": 9, "weekly_boss": 2 } },
+    { "level": 10, "cost": { "mora": 700000, "book_4": 16, "common_3": 12, "weekly_boss": 2, "crown": 1 } }
+  ]
+}
