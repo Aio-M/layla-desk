@@ -88,3 +88,33 @@ body {
     font-size: 0.9rem;
     color: #a0aec0; /* 少し薄い文字色 */
 }
+/* 選択されたカードのデザイン */
+.character-card.selected {
+    border-color: #63b3ed; /* 明るい青色の枠線 */
+    box-shadow: 0 0 15px rgba(99, 179, 237, 0.5); /* 青く光るような影 */
+    background-color: #4a5568;
+}
+
+/* 次へ進むボタンのデザイン */
+.next-step-button {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    margin: 40px auto 20px;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #fff;
+    background: linear-gradient(90deg, #5a67d8, #9f7aea);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.next-step-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
