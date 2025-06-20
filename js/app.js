@@ -2,16 +2,20 @@
 let selectedCharacters = []; 
 let materialInventory = {};
 let allCharacterData = [];
+let allAscensionCosts = {}; // ★追加：突破コストデータを保持
 let currentSortOrder = 'default';
 let currentlyEditingCharId = null;
+let debounceTimer; // ★追加：デバウンス用のタイマー
 
 // -- イベントリスナー --
 document.addEventListener('DOMContentLoaded', () => {
     handleActiveNavLinks();
     if (document.getElementById('character-list')) {
-        loadSelection();
+        loadCharacters().then(() => { // ★データ読み込み完了後に選択状態を反映
+            loadSelection();
+            renderCharacters(); // 選択状態をカードに反映して再描画
+        });
         setupSortButtons();
-        loadCharacters();
         setupModalEventListeners();
     }
     if (document.getElementById('planning-board')) {
@@ -49,7 +53,6 @@ function openLevelModal(charId) {
     document.getElementById('target-lvl-input').value = selectionData ? selectionData.targetLvl : 90;
 
     document.getElementById('modal-remove-btn').style.display = selectionData ? 'block' : 'none';
-
     document.getElementById('level-modal-overlay').style.display = 'flex';
 }
 
@@ -78,7 +81,6 @@ function saveLevelData() {
 
 function removeCharacterFromPlan() {
     if (!currentlyEditingCharId) return;
-
     if (window.confirm("このキャラクターを計画から削除しますか？")) {
         const existingIndex = selectedCharacters.findIndex(c => c.id === currentlyEditingCharId);
         if (existingIndex > -1) {
@@ -124,7 +126,6 @@ async function loadCharacters() {
         const response = await fetch('data/characters.json');
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         allCharacterData = await response.json();
-        renderCharacters();
     } catch (error) {
         console.error('キャラクターデータの読み込みに失敗しました:', error);
         document.getElementById('character-list').innerHTML = '<p style="color: #ffcdd2;">データの読み込みに失敗しました。</p>';
@@ -180,21 +181,23 @@ async function loadPlanningPage() {
         <a href="characters.html" class="back-button">キャラクター選択に戻る</a>
     `;
 
-    const [allCharacters, allMaterials, ascensionCosts] = await Promise.all([
-        fetch('data/characters.json').then(res => res.json()),
-        fetch('data/materials.js').then(res => res.text()).then(text => (new Function(text + '; return allMaterialsData;'))()), // .js file hack
-        fetch('data/ascension.json').then(res => res.json())
+    // ★ データをグローバル変数に格納
+    const [charRes, ascRes] = await Promise.all([
+        fetch('data/characters.json'),
+        fetch('data/ascension.json')
     ]);
+    allCharacterData = await charRes.json();
+    allAscensionCosts = await ascRes.json();
 
-    displaySelectedCharacters(allCharacters);
-    displayRequiredMaterials(allCharacters, allMaterials, ascensionCosts);
+    displaySelectedCharacters();
+    displayRequiredMaterials();
 }
 
-function displaySelectedCharacters(allCharacters) {
+function displaySelectedCharacters() {
     const listElement = document.getElementById('selected-characters-list');
     listElement.innerHTML = '';
     selectedCharacters.forEach(obj => {
-        const charData = allCharacters.find(c => c.id === obj.id);
+        const charData = allCharacterData.find(c => c.id === obj.id);
         if(charData) {
             const item = document.createElement('div');
             item.className = 'plan-char-item';
@@ -208,38 +211,40 @@ function displaySelectedCharacters(allCharacters) {
                         </span>
                     </div>
                     <div class="value-adjuster">
-                        <button class="btn-step" data-id="${charData.id}" data-type="char-level" data-amount="-10">-10</button>
-                        <button class="btn-step" data-id="${charData.id}" data-type="char-level" data-amount="-1">-1</button>
-                        <button class="btn-step" data-id="${charData.id}" data-type="char-level" data-amount="1">+1</button>
-                        <button class="btn-step" data-id="${charData.id}" data-type="char-level" data-amount="10">+10</button>
+                        <button class="btn-step" data-id="${charData.id}" data-amount="-10">--</button>
+                        <button class="btn-step" data-id="${charData.id}" data-amount="-1">-</button>
+                        <input type="range" class="value-slider" id="slider-char-level-${charData.id}"
+                               min="1" max="${obj.targetLvl}" value="${obj.currentLvl}" data-id="${charData.id}">
+                        <button class="btn-step" data-id="${charData.id}" data-amount="1">+</button>
+                        <button class="btn-step" data-id="${charData.id}" data-amount="10">++</button>
                     </div>
-                </div>
-            `;
+                </div>`;
             listElement.appendChild(item);
         }
     });
 
     listElement.querySelectorAll('.btn-step').forEach(button => {
         button.addEventListener('click', (e) => {
-            const id = e.target.dataset.id;
-            const amount = parseInt(e.target.dataset.amount, 10);
-            updateCharacterLevelOnPlan(id, amount);
+            updateCharacterLevelOnPlan(e.target.dataset.id, parseInt(e.target.dataset.amount, 10));
+        });
+    });
+    listElement.querySelectorAll('.value-slider').forEach(slider => {
+        slider.addEventListener('input', (e) => {
+            updateCharacterLevelOnPlan(e.target.dataset.id, parseInt(e.target.value, 10), true);
         });
     });
 }
 
-function displayRequiredMaterials(allCharacters, allMaterials, ascensionCosts) {
+function displayRequiredMaterials() {
     const listElement = document.getElementById('materials-list');
     listElement.innerHTML = '';
-    const totalRequired = calculateTotalMaterials(allCharacters, ascensionCosts);
+    const totalRequired = calculateTotalMaterials();
 
     for (const materialId in totalRequired) {
         const totalNeeded = totalRequired[materialId];
         if (totalNeeded === 0) continue;
-        
-        const materialInfo = allMaterials[materialId];
+        const materialInfo = allMaterialsData[materialId];
         if (!materialInfo) continue;
-
         const currentAmount = materialInventory[materialId] || 0;
         const item = document.createElement('div');
         item.className = 'material-item';
@@ -247,11 +252,8 @@ function displayRequiredMaterials(allCharacters, allMaterials, ascensionCosts) {
         if (materialId === 'mora') {
             item.innerHTML = `
                 <img src="${materialInfo.icon}" alt="${materialInfo.name}" class="material-icon">
-                <div class="material-info">
-                    <div class="material-name">${materialInfo.name}</div>
-                </div>
-                <div class="mora-display">必要数: ${totalNeeded.toLocaleString()}</div>
-            `;
+                <div class="material-info"><div class="material-name">${materialInfo.name}</div></div>
+                <div class="mora-display">必要数: ${totalNeeded.toLocaleString()}</div>`;
         } else {
             item.innerHTML = `
                 <img src="${materialInfo.icon}" alt="${materialInfo.name}" class="material-icon">
@@ -262,59 +264,53 @@ function displayRequiredMaterials(allCharacters, allMaterials, ascensionCosts) {
                     </div>
                 </div>
                 <div class="value-adjuster">
-                    <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="-10">-10</button>
-                    <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="-1">-1</button>
-                    <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="1">+1</button>
-                    <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="10">+10</button>
-                </div>
-            `;
+                    <button class="btn-step" data-id="${materialId}" data-amount="-10">--</button>
+                    <button class="btn-step" data-id="${materialId}" data-amount="-1">-</button>
+                    <input type="range" class="value-slider" id="slider-material-${materialId}"
+                           min="0" max="${totalNeeded}" value="${currentAmount}" data-id="${materialId}">
+                    <button class="btn-step" data-id="${materialId}" data-amount="1">+</button>
+                    <button class="btn-step" data-id="${materialId}" data-amount="10">++</button>
+                </div>`;
         }
         listElement.appendChild(item);
     }
 
-    listElement.querySelectorAll('.btn-step').forEach(button => {
+    listElement.querySelectorAll('.btn-step[data-type="material"]').forEach(button => {
         button.addEventListener('click', (e) => {
-            const id = e.target.dataset.id;
-            const amount = parseInt(e.target.dataset.amount, 10);
-            updateInventory(id, amount);
+            updateInventory(e.target.dataset.id, parseInt(e.target.dataset.amount, 10));
+        });
+    });
+    listElement.querySelectorAll('.value-slider[data-type="material"]').forEach(slider => {
+        slider.addEventListener('input', (e) => {
+            updateInventory(e.target.dataset.id, parseInt(e.target.value, 10), true);
         });
     });
 }
 
-function calculateTotalMaterials(allCharacters, ascensionCosts) {
+function calculateTotalMaterials() {
     const total = {};
     const commonMaterialFamilies = {
         'divining_scroll': ['divining_scroll', 'sealed_scroll', 'forbidden_curse_scroll'],
         'fungal_spores': ['fungal_spores', 'luminescent_pollen', 'crystalline_cyst_dust']
     };
-
     selectedCharacters.forEach(charPlan => {
-        const charData = allCharacters.find(c => c.id === charPlan.id);
+        const charData = allCharacterData.find(c => c.id === charPlan.id);
         if (!charData || !charData.materials) return;
-
         const rarityKey = `rarity_${charData.rarity}`;
-        if (!ascensionCosts[rarityKey]) return;
-        const ascensionPhases = ascensionCosts[rarityKey].phases;
-
+        if (!allAscensionCosts[rarityKey]) return;
+        const ascensionPhases = allAscensionCosts[rarityKey].phases;
         ascensionPhases.forEach(phase => {
             if (charPlan.currentLvl < phase.level && charPlan.targetLvl >= phase.level) {
                 for (const matType in phase.cost) {
                     let materialId = '';
                     const amount = phase.cost[matType];
-                    if (matType === 'mora') {
-                        materialId = 'mora';
-                    } else if (matType === 'boss_material') {
-                        materialId = charData.materials.boss;
-                    } else if (matType === 'local_specialty') {
-                        materialId = charData.materials.local;
-                    } else if (matType.startsWith('gem_')) {
-                        materialId = `${charData.materials.gem}_${matType.split('_')[1]}`;
-                    } else if (matType.startsWith('common_')) {
+                    if (matType === 'mora') materialId = 'mora';
+                    else if (matType === 'boss_material') materialId = charData.materials.boss;
+                    else if (matType === 'local_specialty') materialId = charData.materials.local;
+                    else if (matType.startsWith('gem_')) materialId = `${charData.materials.gem}_${matType.split('_')[1]}`;
+                    else if (matType.startsWith('common_')) {
                         const family = commonMaterialFamilies[charData.materials.common];
-                        if (family) {
-                            const tierIndex = parseInt(matType.split('_')[1], 10) - 1;
-                            materialId = family[tierIndex];
-                        }
+                        if (family) materialId = family[parseInt(matType.split('_')[1], 10) - 1];
                     }
                     if (materialId) {
                         if (!total[materialId]) total[materialId] = 0;
@@ -327,39 +323,38 @@ function calculateTotalMaterials(allCharacters, ascensionCosts) {
     return total;
 }
 
-function updateCharacterLevelOnPlan(charId, amount) {
+function updateCharacterLevelOnPlan(charId, value, isAbsolute = false) {
     const charIndex = selectedCharacters.findIndex(c => c.id === charId);
     if (charIndex > -1) {
-        let newLevel = selectedCharacters[charIndex].currentLvl + amount;
+        let newLevel = isAbsolute ? value : selectedCharacters[charIndex].currentLvl + value;
         if (newLevel < 1) newLevel = 1;
-        if (newLevel > selectedCharacters[charIndex].targetLvl) {
-            newLevel = selectedCharacters[charIndex].targetLvl;
-        }
+        if (newLevel > selectedCharacters[charIndex].targetLvl) newLevel = selectedCharacters[charIndex].targetLvl;
         selectedCharacters[charIndex].currentLvl = newLevel;
         saveSelection();
         document.getElementById(`current-lvl-display-${charId}`).textContent = newLevel;
-        
-        // This needs to be async to work with the new data loading
-        (async () => {
-            const [allCharacters, allMaterials, ascensionCosts] = await Promise.all([
-                fetch('data/characters.json').then(res => res.json()),
-                fetch('data/materials.js').then(res => res.text()).then(text => (new Function(text + '; return allMaterialsData;'))()),
-                fetch('data/ascension.json').then(res => res.json())
-            ]);
-            displayRequiredMaterials(allCharacters, allMaterials, ascensionCosts);
-        })();
+        document.getElementById(`slider-char-level-${charId}`).value = newLevel;
+        debounce(displayRequiredMaterials, 300)();
     }
 }
 
-function updateInventory(materialId, change) {
+function updateInventory(materialId, value, isAbsolute = false) {
     if (!materialInventory[materialId]) materialInventory[materialId] = 0;
-    materialInventory[materialId] += change;
-    if(materialInventory[materialId] < 0) materialInventory[materialId] = 0;
+    let newValue = isAbsolute ? value : materialInventory[materialId] + value;
+    if (newValue < 0) newValue = 0;
+    materialInventory[materialId] = newValue;
     saveInventory();
     const countElement = document.getElementById(`current-mat-display-${materialId}`);
-    if (countElement) {
-        countElement.textContent = materialInventory[materialId].toLocaleString();
-    }
+    const sliderElement = document.getElementById(`slider-material-${materialId}`);
+    if (countElement) countElement.textContent = newValue.toLocaleString();
+    if (sliderElement) sliderElement.value = newValue;
+}
+
+// ★ debounce関数の定義を移動
+function debounce(func, delay) {
+    return function(...args) {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => func.apply(this, args), delay);
+    };
 }
 
 function saveInventory() {
