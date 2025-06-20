@@ -298,3 +298,34 @@ body {
     font-size: 1rem;
     line-height: 1.6;
 }
+
+/* === レスポンシブ対応 (スマートフォン向け) === */
+/* 画面の幅が600px以下の場合に、以下のスタイルを適用 */
+@media (max-width: 600px) {
+
+    /* ヘッダーの左右の余白を少し狭くする */
+    .header {
+        padding: 0 10px;
+    }
+
+    /* ロゴの文字を少し小さくする */
+    .nav-logo {
+        font-size: 1.2rem;
+    }
+
+    /* リンク間の余白を狭くする */
+    .nav-links {
+        gap: 5px;
+    }
+
+    /* リンクの文字サイズと余白を調整 */
+    .nav-link {
+        font-size: 0.9rem;
+        padding: 5px;
+    }
+
+    /* ホームページカードの文字を調整 */
+    #home-page .nav-card h3 {
+        font-size: 1.5rem;
+    }
+}
