@@ -29,14 +29,11 @@ function setupSortButtons() {
     document.querySelectorAll('.sort-btn').forEach(button => {
         button.addEventListener('click', (e) => {
             currentSortOrder = e.target.dataset.sortBy;
-            // すべてのボタンからactiveクラスを削除
             document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
-            // クリックされたボタンにactiveクラスを追加
             e.target.classList.add('active');
             renderCharacters(); // ソートして再描画
         });
     });
-    // デフォルトのボタンをアクティブに
     document.querySelector('.sort-btn[data-sort-by="default"]').classList.add('active');
 }
 
@@ -52,12 +49,9 @@ async function loadCharacters() {
     }
 }
 
-// キャラクターを描画する関数（ソート機能付き）
 function renderCharacters() {
     const listElement = document.getElementById('character-list');
     listElement.innerHTML = '';
-
-    // ソート順に応じてキャラクターデータ配列を並び替え
     const sortedCharacters = sortCharacters(allCharacterData, currentSortOrder);
 
     sortedCharacters.forEach(character => {
@@ -66,27 +60,23 @@ function renderCharacters() {
         if (selectedCharacters.includes(character.id)) {
             card.classList.add('selected');
         }
-        // title属性に名前を追加（PCでマウスホバー時に表示）
         card.title = character.name;
-        card.innerHTML = `<img src="<span class="math-inline">\{character\.image\_path\}" alt\="</span>{character.name}" class="character-image">`;
+        card.innerHTML = `<img src="${character.image_path}" alt="${character.name}" class="character-image">`;
         card.addEventListener('click', () => toggleCharacterSelection(character.id, card));
         listElement.appendChild(card);
     });
 }
 
-// キャラクター配列をソートする関数
 function sortCharacters(characters, sortBy) {
-    // .slice()で元の配列のコピーを作成してからソートする
+    const elementOrder = ["炎", "水", "風", "雷", "草", "氷", "岩"];
+    const weaponOrder = ["片手剣", "両手剣", "長柄武器", "弓", "法器"];
     switch (sortBy) {
         case 'element':
-            const elementOrder = ["炎", "水", "風", "雷", "草", "氷", "岩"];
-            return characters.slice().sort((a, b) => elementOrder.indexOf(a.element) - elementOrder.indexOf(b.element));
+            return [...characters].sort((a, b) => elementOrder.indexOf(a.element) - elementOrder.indexOf(b.element));
         case 'weapon':
-            const weaponOrder = ["片手剣", "両手剣", "長柄武器", "弓", "法器"];
-            return characters.slice().sort((a, b) => weaponOrder.indexOf(a.weapon_type) - weaponOrder.indexOf(b.weapon_type));
-        case 'default':
+            return [...characters].sort((a, b) => weaponOrder.indexOf(a.weapon_type) - weaponOrder.indexOf(b.weapon_type));
         default:
-            return characters; // デフォルトは元の順
+            return characters;
     }
 }
 
@@ -111,7 +101,6 @@ function loadSelection() {
     }
 }
 
-// (以下、育成計画ページのコードは変更なし)
 // ===============================
 //  育成計画ページ (planning.html)
 // ===============================
@@ -132,7 +121,7 @@ function displaySelectedCharacters(allCharacters) {
         if(charData) {
             const charDisplay = document.createElement('div');
             charDisplay.className = 'mini-char-card';
-            charDisplay.innerHTML = `<img src="<span class="math-inline">\{charData\.image\_path\}" alt\="</span>{charData.name}"><span>${charData.name}</span>`;
+            charDisplay.innerHTML = `<img src="${charData.image_path}" alt="${charData.name}"><span>${charData.name}</span>`;
             listElement.appendChild(charDisplay);
         }
     });
@@ -152,7 +141,16 @@ function displayRequiredMaterials() {
         const currentAmount = materialInventory[materialId] || 0;
         const item = document.createElement('div');
         item.className = 'material-item';
-        item.innerHTML = `<span class="material-name">${materialNames[materialId]}</span><span class="material-total">必要数: <span class="math-inline">\{totalNeeded\.toLocaleString\(\)\}</span\><div class\="material\-counter"\><button class\="counter\-btn" data\-id\="</span>{materialId}" data-amount="-1">-</button><span class="current-count" id="count-<span class="math-inline">\{materialId\}"\></span>{currentAmount.toLocaleString()}</span><button class="counter-btn" data-id="${materialId}" data-amount="1">+</button></div>`;
+        // 以下のinnerHTMLをバッククォート(`)で囲むことが重要です
+        item.innerHTML = `
+            <span class="material-name">${materialNames[materialId]}</span>
+            <span class="material-total">必要数: ${totalNeeded.toLocaleString()}</span>
+            <div class="material-counter">
+                <button class="counter-btn" data-id="${materialId}" data-amount="-1">-</button>
+                <span class="current-count" id="count-${materialId}">${currentAmount.toLocaleString()}</span>
+                <button class="counter-btn" data-id="${materialId}" data-amount="1">+</button>
+            </div>
+        `;
         listElement.appendChild(item);
     }
     listElement.querySelectorAll('.counter-btn').forEach(button => {
@@ -178,5 +176,7 @@ function saveInventory() {
 
 function loadInventory() {
     const saved = localStorage.getItem('laylaDesk_inventory');
-    if (saved) materialInventory = JSON.parse(saved);
+    if (saved) {
+        materialInventory = JSON.parse(saved);
+    }
 }
