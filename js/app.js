@@ -3,7 +3,7 @@ let selectedCharacters = [];
 let materialInventory = {};
 let allCharacterData = [];
 let currentSortOrder = 'default';
-let currentlyEditingCharId = null; // モーダルで編集中のキャラID
+let currentlyEditingCharId = null;
 
 // -- イベントリスナー --
 document.addEventListener('DOMContentLoaded', () => {
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadSelection();
         setupSortButtons();
         loadCharacters();
-        setupModalEventListeners(); // ★モーダルのイベントリスナーを準備
+        setupModalEventListeners();
     }
     if (document.getElementById('planning-board')) {
         loadPlanningPage();
@@ -23,6 +23,89 @@ document.addEventListener('DOMContentLoaded', () => {
 // ===================================
 //  キャラクター選択ページ (characters.html)
 // ===================================
+
+function setupModalEventListeners() {
+    const overlay = document.getElementById('level-modal-overlay');
+    const saveBtn = document.getElementById('modal-save-btn');
+    const cancelBtn = document.getElementById('modal-cancel-btn');
+    const removeBtn = document.getElementById('modal-remove-btn');
+
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeLevelModal();
+    });
+    
+    saveBtn.addEventListener('click', saveLevelData);
+    cancelBtn.addEventListener('click', closeLevelModal);
+    removeBtn.addEventListener('click', removeCharacterFromPlan);
+}
+
+function openLevelModal(charId) {
+    currentlyEditingCharId = charId;
+    const charData = allCharacterData.find(c => c.id === charId);
+    const selectionData = selectedCharacters.find(c => c.id === charId);
+
+    document.getElementById('modal-char-name').textContent = charData.name;
+    document.getElementById('current-lvl-input').value = selectionData ? selectionData.currentLvl : 1;
+    document.getElementById('target-lvl-input').value = selectionData ? selectionData.targetLvl : 90;
+
+    document.getElementById('modal-remove-btn').style.display = selectionData ? 'block' : 'none';
+
+    document.getElementById('level-modal-overlay').style.display = 'flex';
+}
+
+function closeLevelModal() {
+    document.getElementById('level-modal-overlay').style.display = 'none';
+    currentlyEditingCharId = null;
+}
+
+function saveLevelData() {
+    if (!currentlyEditingCharId) return;
+    const currentLvl = parseInt(document.getElementById('current-lvl-input').value, 10);
+    const targetLvl = parseInt(document.getElementById('target-lvl-input').value, 10);
+    const existingIndex = selectedCharacters.findIndex(c => c.id === currentlyEditingCharId);
+
+    if (existingIndex > -1) {
+        selectedCharacters[existingIndex].currentLvl = currentLvl;
+        selectedCharacters[existingIndex].targetLvl = targetLvl;
+    } else {
+        selectedCharacters.push({ id: currentlyEditingCharId, currentLvl: currentLvl, targetLvl: targetLvl });
+    }
+    
+    saveSelection();
+    renderCharacters();
+    closeLevelModal();
+}
+
+function removeCharacterFromPlan() {
+    if (!currentlyEditingCharId) return;
+
+    if (window.confirm("このキャラクターを計画から削除しますか？")) {
+        const existingIndex = selectedCharacters.findIndex(c => c.id === currentlyEditingCharId);
+        if (existingIndex > -1) {
+            selectedCharacters.splice(existingIndex, 1);
+        }
+        saveSelection();
+        renderCharacters();
+        closeLevelModal();
+    }
+}
+
+function renderCharacters() {
+    const listElement = document.getElementById('character-list');
+    listElement.innerHTML = '';
+    const sortedCharacters = sortCharacters(allCharacterData, currentSortOrder);
+    sortedCharacters.forEach(character => {
+        const card = document.createElement('div');
+        card.className = 'character-card';
+        if (selectedCharacters.find(c => c.id === character.id)) {
+            card.classList.add('selected');
+        }
+        card.title = character.name;
+        card.innerHTML = `<img src="${character.image_path}" alt="${character.name}" class="character-image"><h4 class="character-name">${character.name}</h4>`;
+        card.addEventListener('click', () => openLevelModal(character.id));
+        listElement.appendChild(card);
+    });
+}
 
 function setupSortButtons() {
     document.querySelectorAll('.sort-btn').forEach(button => {
@@ -48,37 +131,6 @@ async function loadCharacters() {
     }
 }
 
-// ▼▼▼ renderCharacters関数を、シンプルなカード表示に戻し、クリックでモーダルを開くように変更 ▼▼▼
-function renderCharacters() {
-    const listElement = document.getElementById('character-list');
-    listElement.innerHTML = '';
-    const sortedCharacters = sortCharacters(allCharacterData, currentSortOrder);
-
-    sortedCharacters.forEach(character => {
-        const card = document.createElement('div');
-        card.className = 'character-card';
-        // 選択リストに含まれているか確認し、selectedクラスを付ける
-        if (selectedCharacters.find(c => c.id === character.id)) {
-            card.classList.add('selected');
-        }
-        card.title = character.name;
-        // カードのHTMLからレベル入力欄を削除
-        card.innerHTML = `
-            <img src="${character.image_path}" alt="${character.name}" class="character-image">
-            <div class="character-info">
-                <h4 class="character-name">${character.name}</h4>
-            </div>
-        `;
-        
-        // カードがクリックされたら、選択処理ではなくモーダルを開く
-        card.addEventListener('click', () => {
-            openLevelModal(character.id);
-        });
-        
-        listElement.appendChild(card);
-    });
-}
-
 function sortCharacters(characters, sortBy) {
     const elementOrder = ["炎", "水", "風", "雷", "草", "氷", "岩", "無"];
     const weaponOrder = ["片手剣", "両手剣", "長柄武器", "弓", "法器", "拳"];
@@ -92,71 +144,6 @@ function sortCharacters(characters, sortBy) {
     }
 }
 
-// ▼▼▼ 新しいモーダル関連の関数群 ▼▼▼
-
-function setupModalEventListeners() {
-    const overlay = document.getElementById('level-modal-overlay');
-    const saveBtn = document.getElementById('modal-save-btn');
-    const cancelBtn = document.getElementById('modal-cancel-btn');
-
-    // 背景（オーバーレイ）をクリックしたらモーダルを閉じる
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-            closeLevelModal();
-        }
-    });
-    
-    saveBtn.addEventListener('click', saveLevelData);
-    cancelBtn.addEventListener('click', closeLevelModal);
-}
-
-function openLevelModal(charId) {
-    currentlyEditingCharId = charId;
-    const charData = allCharacterData.find(c => c.id === charId);
-    const selectionData = selectedCharacters.find(c => c.id === charId);
-
-    // モーダルにキャラクター名と、保存されたレベル（なければデフォルト値）を設定
-    document.getElementById('modal-char-name').textContent = charData.name;
-    document.getElementById('current-lvl-input').value = selectionData ? selectionData.currentLvl : 1;
-    document.getElementById('target-lvl-input').value = selectionData ? selectionData.targetLvl : 90;
-
-    // モーダルを表示
-    document.getElementById('level-modal-overlay').style.display = 'flex';
-}
-
-function closeLevelModal() {
-    document.getElementById('level-modal-overlay').style.display = 'none';
-    currentlyEditingCharId = null;
-}
-
-function saveLevelData() {
-    if (!currentlyEditingCharId) return;
-
-    const currentLvl = parseInt(document.getElementById('current-lvl-input').value, 10);
-    const targetLvl = parseInt(document.getElementById('target-lvl-input').value, 10);
-
-    const existingIndex = selectedCharacters.findIndex(c => c.id === currentlyEditingCharId);
-
-    if (existingIndex > -1) {
-        // 既に選択リストにいる場合はレベルを更新
-        selectedCharacters[existingIndex].currentLvl = currentLvl;
-        selectedCharacters[existingIndex].targetLvl = targetLvl;
-    } else {
-        // 新しく選択リストに追加する場合
-        selectedCharacters.push({ id: currentlyEditingCharId, currentLvl: currentLvl, targetLvl: targetLvl });
-    }
-    
-    saveSelection();    // 変更をLocalStorageに保存
-    renderCharacters(); // カードの選択状態を更新するために再描画
-    closeLevelModal();
-}
-
-
-// ▼▼▼ toggle~ や update~ 関数はモーダル方式では不要になるため削除します ▼▼▼
-// function toggleCharacterSelection(...) { ... }
-// function updateCharacterLevel(...) { ... }
-
-
 function saveSelection() {
     localStorage.setItem('laylaDesk_selectedCharacters', JSON.stringify(selectedCharacters));
 }
@@ -168,7 +155,6 @@ function loadSelection() {
     }
 }
 
-
 // ===============================
 //  育成計画ページ (planning.html)
 // ===============================
@@ -176,6 +162,10 @@ function loadSelection() {
 async function loadPlanningPage() {
     loadSelection();
     loadInventory();
+    if (selectedCharacters.length === 0) {
+        document.getElementById('planning-board').innerHTML = '<p style="text-align:center;">計画にキャラクターが追加されていません。<br>「キャラクター」ページから育成したいキャラクターを選択してください。</p>';
+        return;
+    }
     const allCharacters = await fetch('data/characters.json').then(res => res.json());
     displaySelectedCharacters(allCharacters);
     displayRequiredMaterials();
@@ -189,9 +179,25 @@ function displaySelectedCharacters(allCharacters) {
         if(charData) {
             const charDisplay = document.createElement('div');
             charDisplay.className = 'mini-char-card';
-            charDisplay.innerHTML = `<img src="${charData.image_path}" alt="${charData.name}"><span>${charData.name} Lv${obj.currentLvl}→${obj.targetLvl}</span>`;
+            charDisplay.innerHTML = `
+                <img src="${charData.image_path}" alt="${charData.name}">
+                <span>${charData.name} Lv${obj.currentLvl}→${obj.targetLvl}</span>
+                <button class="delete-char-btn" data-id="${charData.id}">×</button>
+            `;
             listElement.appendChild(charDisplay);
         }
+    });
+
+    listElement.querySelectorAll('.delete-char-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const charId = e.target.dataset.id;
+            if(window.confirm("このキャラクターを計画から削除しますか？")) {
+                selectedCharacters = selectedCharacters.filter(c => c.id !== charId);
+                saveSelection();
+                document.getElementById('planning-board').innerHTML = '';
+                loadPlanningPage();
+            }
+        });
     });
 }
 
