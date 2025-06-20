@@ -1,7 +1,10 @@
 const allMaterialsData = {
   // パイモンが一番好きなもの
   "mora": { "name": "モラ", "icon": "images/materials/Mora_icon.webp" },
-  
+
+  // 経験値本
+  "heros_wit": { "name": "大英雄の経験", "icon": "images/materials/Heros_Wit_icon.webp" },
+
   // 宝石 (Gem)
   "shivada_jade_sliver": { "name": "哀切なアイスクリスタル・砕屑", "icon": "images/materials/gem/Shivada_Jade_Sliver_icon.webp" },
   "shivada_jade_fragment": { "name": "哀切なアイスクリスタル・欠片", "icon": "images/materials/gem/Shivada_Jade_Fragment_icon.webp" },
