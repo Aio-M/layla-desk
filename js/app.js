@@ -11,10 +11,9 @@ let debounceTimer;
 document.addEventListener('DOMContentLoaded', () => {
     handleActiveNavLinks();
     if (document.getElementById('character-list')) {
-        // データ読み込みを先に行う
         loadCharacters().then(() => {
             loadSelection();
-            renderCharacters(); // 選択状態を反映して再描画
+            renderCharacters();
         });
         setupSortButtons();
         setupModalEventListeners();
@@ -182,7 +181,6 @@ async function loadPlanningPage() {
         <a href="characters.html" class="back-button">キャラクター選択に戻る</a>
     `;
 
-    // データをグローバル変数に格納
     const [charRes, ascRes] = await Promise.all([
         fetch('data/characters.json'),
         fetch('data/ascension.json')
@@ -202,6 +200,7 @@ function displaySelectedCharacters() {
         if(charData) {
             const item = document.createElement('div');
             item.className = 'plan-char-item';
+            // ▼▼▼ この中のボタンに data-type="char-level" を追加 ▼▼▼
             item.innerHTML = `
                 <img src="${charData.image_path}" alt="${charData.name}">
                 <div class="plan-char-details">
@@ -212,12 +211,12 @@ function displaySelectedCharacters() {
                         </span>
                     </div>
                     <div class="value-adjuster">
-                        <button class="btn-step" data-id="${charData.id}" data-amount="-10">--</button>
-                        <button class="btn-step" data-id="${charData.id}" data-amount="-1">-</button>
+                        <button class="btn-step" data-id="${charData.id}" data-type="char-level" data-amount="-10">--</button>
+                        <button class="btn-step" data-id="${charData.id}" data-type="char-level" data-amount="-1">-</button>
                         <input type="range" class="value-slider" id="slider-char-level-${charData.id}"
                                min="1" max="${obj.targetLvl}" value="${obj.currentLvl}" data-id="${charData.id}" data-type="char-level">
-                        <button class="btn-step" data-id="${charData.id}" data-amount="1">+</button>
-                        <button class="btn-step" data-id="${charData.id}" data-amount="10">++</button>
+                        <button class="btn-step" data-id="${charData.id}" data-type="char-level" data-amount="1">+</button>
+                        <button class="btn-step" data-id="${charData.id}" data-type="char-level" data-amount="10">++</button>
                     </div>
                 </div>`;
             listElement.appendChild(item);
@@ -245,7 +244,6 @@ function displayRequiredMaterials() {
         const totalNeeded = totalRequired[materialId];
         if (totalNeeded === 0) continue;
         
-        // allMaterialsData はグローバル変数として直接参照
         const materialInfo = allMaterialsData[materialId];
         if (!materialInfo) continue;
 
@@ -259,6 +257,7 @@ function displayRequiredMaterials() {
                 <div class="material-info"><div class="material-name">${materialInfo.name}</div></div>
                 <div class="mora-display">必要数: ${totalNeeded.toLocaleString()}</div>`;
         } else {
+            // ▼▼▼ この中のボタンに data-type="material" を追加 ▼▼▼
             item.innerHTML = `
                 <img src="${materialInfo.icon}" alt="${materialInfo.name}" class="material-icon">
                 <div class="material-info">
@@ -268,12 +267,12 @@ function displayRequiredMaterials() {
                     </div>
                 </div>
                 <div class="value-adjuster">
-                    <button class="btn-step" data-id="${materialId}" data-amount="-10">--</button>
-                    <button class="btn-step" data-id="${materialId}" data-amount="-1">-</button>
+                    <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="-10">--</button>
+                    <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="-1">-</button>
                     <input type="range" class="value-slider" id="slider-material-${materialId}"
                            min="0" max="${totalNeeded}" value="${currentAmount}" data-id="${materialId}" data-type="material">
-                    <button class="btn-step" data-id="${materialId}" data-amount="1">+</button>
-                    <button class="btn-step" data-id="${materialId}" data-amount="10">++</button>
+                    <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="1">+</button>
+                    <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="10">++</button>
                 </div>`;
         }
         listElement.appendChild(item);
@@ -356,9 +355,9 @@ function updateInventory(materialId, value, isAbsolute = false) {
 }
 
 function debounce(func, delay) {
-    return function(...args) {
+    return function() {
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => func.apply(this, args), delay);
+        debounceTimer = setTimeout(() => func.apply(this, arguments), delay);
     };
 }
 
