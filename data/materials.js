@@ -3,7 +3,7 @@ const allMaterialsData = {
   "mora": { "name": "モラ", "icon": "images/materials/Mora_icon.webp" },
 
   // 経験値本
-  "heros_wit": { "name": "大英雄の経験", "icon": "images/materials/Heros_Wit_icon.webp" },
+  "hero_wit": { "name": "大英雄の経験", "icon": "images/materials/Heros_Wit_icon.webp" },
 
   // 宝石 (Gem)
   "shivada_jade_sliver": { "name": "哀切なアイスクリスタル・砕屑", "icon": "images/materials/gem/Shivada_Jade_Sliver_icon.webp" },
