@@ -153,7 +153,6 @@ async function loadCharacters() {
 function sortCharacters(characters, sortBy) {
     const elementOrder = ["炎", "水", "風", "雷", "草", "氷", "岩", "無"];
     const weaponOrder = ["片手剣", "両手剣", "長柄武器", "弓", "法器", "拳"];
-    // .slice() を使って配列のコピーを作成してからソートする
     const charsCopy = [...characters];
     switch (sortBy) {
         case 'element':
@@ -189,6 +188,7 @@ async function loadPlanningPage() {
     loadSelection();
     loadInventory();
     const planningBoard = document.getElementById('planning-board');
+    if (!planningBoard) return;
     if (selectedCharacters.length === 0) {
         planningBoard.innerHTML = '<p style="text-align:center;">計画にキャラクターが追加されていません。<br>「キャラクター」ページから育成したいキャラクターを選択してください。</p>';
         return;
@@ -214,7 +214,6 @@ async function loadPlanningPage() {
             fetch('data/talent_costs.json')
         ]);
 
-        // すべてのJSONが正しく読み込めたかチェック
         if (!charRes.ok || !ascRes.ok || !levelRes.ok || !talentRes.ok) {
             throw new Error('データベースファイルの一部が読み込めませんでした。');
         }
@@ -268,13 +267,14 @@ function displaySelectedCharacters() {
     });
 }
 
+// ▼▼▼ この関数を、ボタンとスライダーが表示される正しいバージョンに戻します ▼▼▼
 function displayRequiredMaterials() {
     const listElement = document.getElementById('materials-list');
     listElement.innerHTML = '';
     const totalRequired = calculateTotalMaterials();
     for (const materialId in totalRequired) {
         if (totalRequired[materialId] <= 0) continue;
-        const materialInfo = allMaterialsData[materialId]; // グローバル変数から参照
+        const materialInfo = allMaterialsData[materialId];
         if (!materialInfo) {
              console.error(`警告: ${materialId} の情報が materials.js に見つかりません。`);
              continue;
@@ -295,10 +295,29 @@ function displayRequiredMaterials() {
                     <div class="material-amount-display">
                         <span id="current-mat-display-${materialId}">${currentAmount.toLocaleString()}</span> / ${totalRequired[materialId].toLocaleString()}
                     </div>
+                </div>
+                <div class="value-adjuster">
+                    <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="-10">--</button>
+                    <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="-1">-</button>
+                    <input type="range" class="value-slider" id="slider-material-${materialId}"
+                           min="0" max="${totalRequired[materialId]}" value="${currentAmount}" data-id="${materialId}" data-type="material">
+                    <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="1">+</button>
+                    <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="10">++</button>
                 </div>`;
         }
         listElement.appendChild(item);
     }
+
+    listElement.querySelectorAll('.btn-step[data-type="material"]').forEach(button => {
+        button.addEventListener('click', (e) => {
+            updateInventory(e.target.dataset.id, parseInt(e.target.dataset.amount, 10));
+        });
+    });
+    listElement.querySelectorAll('.value-slider[data-type="material"]').forEach(slider => {
+        slider.addEventListener('input', (e) => {
+            updateInventory(e.target.dataset.id, parseInt(e.target.value, 10), true);
+        });
+    });
 }
 
 function calculateTotalMaterials() {
@@ -315,7 +334,6 @@ function calculateTotalMaterials() {
         const charData = allCharacterData.find(c => c.id === charPlan.id);
         if (!charData) return;
 
-        // レベルアップコスト
         const expData = allLevelCosts.character_exp;
         const targetExp = expData.find(e => e.level === charPlan.targetLvl)?.exp || 0;
         const currentExp = expData.find(e => e.level === charPlan.currentLvl)?.exp || 0;
@@ -326,7 +344,6 @@ function calculateTotalMaterials() {
             total.hero_wit += Math.ceil(requiredExp / allLevelCosts.exp_books.hero_wit);
         }
 
-        // レベル突破コスト
         if (charData.materials) {
             const ascPhases = allAscensionCosts[`rarity_${charData.rarity}`]?.phases || [];
             ascPhases.forEach(p => {
@@ -353,7 +370,6 @@ function calculateTotalMaterials() {
             });
         }
 
-        // 天賦レベルアップコスト
         if (charData.materials) {
             const talentLevels = allTalentCosts.levels;
             for (let i = 1; i <= 3; i++) {
@@ -389,7 +405,22 @@ function calculateTotalMaterials() {
     return total;
 }
 
-// (これ以降の関数は変更なし)
+function updateCharacterLevelOnPlan(charId, value, isAbsolute = false) {
+    const charIndex = seletedCharacters.findIndex(c => c.id === charId);
+    if (charIndex > -1) {
+        let newLevel = isAbsolute ? value : selectedCharacters[charIndex].currentLvl + value;
+        if (newLevel < 1) newLevel = 1;
+        if (newLevel > selectedCharacters[charIndex].targetLvl) {
+            newLevel = selectedCharacters[charIndex].targetLvl;
+        }
+        selectedCharacters[charIndex].currentLvl = newLevel;
+        saveSelection();
+        document.getElementById(`current-lvl-display-${charId}`).textContent = newLevel;
+        document.getElementById(`slider-char-level-${charId}`).value = newLevel;
+        debounce(displayRequiredMaterials, 300)();
+    }
+}
+
 function updateInventory(materialId, value, isAbsolute = false) {
     if (!materialInventory[materialId]) materialInventory[materialId] = 0;
     let newValue = isAbsolute ? value : materialInventory[materialId] + value;
