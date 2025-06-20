@@ -3,6 +3,7 @@ let selectedCharacters = [];
 let materialInventory = {};
 let allCharacterData = [];
 let allAscensionCosts = {};
+let allLevelCosts = {}; // ★追加：レベルコストデータをグローバルに保持
 let currentSortOrder = 'default';
 let currentlyEditingCharId = null;
 let debounceTimer;
@@ -33,11 +34,9 @@ function setupModalEventListeners() {
     const saveBtn = document.getElementById('modal-save-btn');
     const cancelBtn = document.getElementById('modal-cancel-btn');
     const removeBtn = document.getElementById('modal-remove-btn');
-
     overlay.addEventListener('click', (e) => {
         if (e.target === overlay) closeLevelModal();
     });
-    
     saveBtn.addEventListener('click', saveLevelData);
     cancelBtn.addEventListener('click', closeLevelModal);
     removeBtn.addEventListener('click', removeCharacterFromPlan);
@@ -47,11 +46,9 @@ function openLevelModal(charId) {
     currentlyEditingCharId = charId;
     const charData = allCharacterData.find(c => c.id === charId);
     const selectionData = selectedCharacters.find(c => c.id === charId);
-
     document.getElementById('modal-char-name').textContent = charData.name;
     document.getElementById('current-lvl-input').value = selectionData ? selectionData.currentLvl : 1;
     document.getElementById('target-lvl-input').value = selectionData ? selectionData.targetLvl : 90;
-
     document.getElementById('modal-remove-btn').style.display = selectionData ? 'block' : 'none';
     document.getElementById('level-modal-overlay').style.display = 'flex';
 }
@@ -66,14 +63,12 @@ function saveLevelData() {
     const currentLvl = parseInt(document.getElementById('current-lvl-input').value, 10);
     const targetLvl = parseInt(document.getElementById('target-lvl-input').value, 10);
     const existingIndex = selectedCharacters.findIndex(c => c.id === currentlyEditingCharId);
-
     if (existingIndex > -1) {
         selectedCharacters[existingIndex].currentLvl = currentLvl;
         selectedCharacters[existingIndex].targetLvl = targetLvl;
     } else {
         selectedCharacters.push({ id: currentlyEditingCharId, currentLvl: currentLvl, targetLvl: targetLvl });
     }
-    
     saveSelection();
     renderCharacters();
     closeLevelModal();
@@ -181,7 +176,7 @@ async function loadPlanningPage() {
         <a href="characters.html" class="back-button">キャラクター選択に戻る</a>
     `;
 
-    // ★ level_costs.json も読み込むように追加
+    // ★ データをグローバル変数に格納するように修正
     const [charRes, ascRes, levelRes] = await Promise.all([
         fetch('data/characters.json'),
         fetch('data/ascension.json'),
@@ -189,79 +184,152 @@ async function loadPlanningPage() {
     ]);
     allCharacterData = await charRes.json();
     allAscensionCosts = await ascRes.json();
-    const allLevelCosts = await levelRes.json(); // ★読み込んだデータを変数に
+    allLevelCosts = await levelRes.json();
 
     displaySelectedCharacters();
-    // ★ levelCostsも渡すように変更
-    displayRequiredMaterials(allLevelCosts);
+    displayRequiredMaterials(); // 引数が不要に
 }
 
 function displaySelectedCharacters() {
-    // ... (この関数は変更なし)
+    const listElement = document.getElementById('selected-characters-list');
+    listElement.innerHTML = '';
+    selectedCharacters.forEach(obj => {
+        const charData = allCharacterData.find(c => c.id === obj.id);
+        if(charData) {
+            const item = document.createElement('div');
+            item.className = 'plan-char-item';
+            item.innerHTML = `
+                <img src="${charData.image_path}" alt="${charData.name}">
+                <div class="plan-char-details">
+                    <div class="plan-char-info">
+                        <span class="plan-char-name">${charData.name}</span>
+                        <span class="plan-char-level-display">
+                            Lv <span id="current-lvl-display-${charData.id}">${obj.currentLvl}</span> / ${obj.targetLvl}
+                        </span>
+                    </div>
+                    <div class="value-adjuster">
+                        <button class="btn-step" data-id="${charData.id}" data-type="char-level" data-amount="-10">--</button>
+                        <button class="btn-step" data-id="${charData.id}" data-type="char-level" data-amount="-1">-</button>
+                        <input type="range" class="value-slider" id="slider-char-level-${charData.id}"
+                               min="1" max="${obj.targetLvl}" value="${obj.currentLvl}" data-id="${charData.id}" data-type="char-level">
+                        <button class="btn-step" data-id="${charData.id}" data-type="char-level" data-amount="1">+</button>
+                        <button class="btn-step" data-id="${charData.id}" data-type="char-level" data-amount="10">++</button>
+                    </div>
+                </div>`;
+            listElement.appendChild(item);
+        }
+    });
+
+    listElement.querySelectorAll('.btn-step[data-type="char-level"]').forEach(button => {
+        button.addEventListener('click', (e) => {
+            updateCharacterLevelOnPlan(e.target.dataset.id, parseInt(e.target.dataset.amount, 10));
+        });
+    });
+    listElement.querySelectorAll('.value-slider[data-type="char-level"]').forEach(slider => {
+        slider.addEventListener('input', (e) => {
+            updateCharacterLevelOnPlan(e.target.dataset.id, parseInt(e.target.value, 10), true);
+        });
+    });
 }
 
-// ★ 引数と、呼び出す関数を変更
-function displayRequiredMaterials(allLevelCosts) {
+function displayRequiredMaterials() {
     const listElement = document.getElementById('materials-list');
     listElement.innerHTML = '';
+    const totalRequired = calculateTotalMaterials();
 
-    const totalRequired = calculateTotalMaterials(allLevelCosts); // ★引数を渡す
+    // allMaterialsData はグローバル変数
+    for (const materialId in totalRequired) {
+        const totalNeeded = totalRequired[materialId];
+        if (totalNeeded === 0) continue;
+        const materialInfo = allMaterialsData[materialId];
+        if (!materialInfo) continue;
+        const currentAmount = materialInventory[materialId] || 0;
+        const item = document.createElement('div');
+        item.className = 'material-item';
 
-    // ... (これ以降の表示部分は変更なし)
+        if (materialId === 'mora') {
+            item.innerHTML = `
+                <img src="${materialInfo.icon}" alt="${materialInfo.name}" class="material-icon">
+                <div class="material-info"><div class="material-name">${materialInfo.name}</div></div>
+                <div class="mora-display">必要数: ${totalNeeded.toLocaleString()}</div>`;
+        } else {
+            item.innerHTML = `
+                <img src="${materialInfo.icon}" alt="${materialInfo.name}" class="material-icon">
+                <div class="material-info">
+                    <div class="material-name">${materialInfo.name}</div>
+                    <div class="material-amount-display">
+                        <span id="current-mat-display-${materialId}">${currentAmount.toLocaleString()}</span> / ${totalNeeded.toLocaleString()}
+                    </div>
+                </div>
+                <div class="value-adjuster">
+                    <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="-10">--</button>
+                    <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="-1">-</button>
+                    <input type="range" class="value-slider" id="slider-material-${materialId}"
+                           min="0" max="${totalNeeded}" value="${currentAmount}" data-id="${materialId}" data-type="material">
+                    <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="1">+</button>
+                    <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="10">++</button>
+                </div>`;
+        }
+        listElement.appendChild(item);
+    }
+
+    listElement.querySelectorAll('.btn-step[data-type="material"]').forEach(button => {
+        button.addEventListener('click', (e) => {
+            updateInventory(e.target.dataset.id, parseInt(e.target.dataset.amount, 10));
+        });
+    });
+    listElement.querySelectorAll('.value-slider[data-type="material"]').forEach(slider => {
+        slider.addEventListener('input', (e) => {
+            updateInventory(e.target.dataset.id, parseInt(e.target.value, 10), true);
+        });
+    });
 }
 
-// ▼▼▼ calculateTotalMaterials関数を全面的に書き換え ▼▼▼
-function calculateTotalMaterials(allLevelCosts) {
-    const total = {
-        mora: 0 // モラを初期化
-    };
-
+function calculateTotalMaterials() {
+    const total = { mora: 0 };
     const commonMaterialFamilies = {
         'divining_scroll': ['divining_scroll', 'sealed_scroll', 'forbidden_curse_scroll'],
         'fungal_spores': ['fungal_spores', 'luminescent_pollen', 'crystalline_cyst_dust']
     };
-
     selectedCharacters.forEach(charPlan => {
         const charData = allCharacterData.find(c => c.id === charPlan.id);
         if (!charData) return;
 
-        // --- 1. レベルアップコストの計算 ---
         const expData = allLevelCosts.character_exp;
         const targetExp = expData.find(e => e.level === charPlan.targetLvl)?.exp || 0;
         const currentExp = expData.find(e => e.level === charPlan.currentLvl)?.exp || 0;
         const requiredExp = targetExp - currentExp;
-
         if (requiredExp > 0) {
-            // 必要モラ (EXP1あたり0.2モラ)
             total.mora += requiredExp * allLevelCosts.mora_per_exp;
-            // 必要経験値本（大英雄の経験）
             const heroWitExp = allLevelCosts.exp_books.hero_wit;
             const requiredBooks = Math.ceil(requiredExp / heroWitExp);
             if (!total.hero_wit) total.hero_wit = 0;
             total.hero_wit += requiredBooks;
         }
 
-        // --- 2. レベル突破コストの計算 ---
         if (!charData.materials) return;
         const rarityKey = `rarity_${charData.rarity}`;
         if (!allAscensionCosts[rarityKey]) return;
         const ascensionPhases = allAscensionCosts[rarityKey].phases;
-
         ascensionPhases.forEach(phase => {
             if (charPlan.currentLvl < phase.level && charPlan.targetLvl >= phase.level) {
                 for (const matType in phase.cost) {
                     let materialId = '';
                     const amount = phase.cost[matType];
                     if (matType === 'mora') {
-                        total.mora += amount; // 突破モラを加算
+                        total.mora += amount;
                     } else {
-                       // (宝石、ボス素材などの計算ロジックは変更なし)
-                       // ...
-                    }
-
-                    if (materialId && matType !== 'mora') {
-                        if (!total[materialId]) total[materialId] = 0;
-                        total[materialId] += amount;
+                        if (matType === 'boss_material') materialId = charData.materials.boss;
+                        else if (matType === 'local_specialty') materialId = charData.materials.local;
+                        else if (matType.startsWith('gem_')) materialId = `${charData.materials.gem}_${matType.split('_')[1]}`;
+                        else if (matType.startsWith('common_')) {
+                            const family = commonMaterialFamilies[charData.materials.common];
+                            if (family) materialId = family[parseInt(matType.split('_')[1], 10) - 1];
+                        }
+                        if (materialId) {
+                            if (!total[materialId]) total[materialId] = 0;
+                            total[materialId] += amount;
+                        }
                     }
                 }
             }
@@ -270,14 +338,18 @@ function calculateTotalMaterials(allLevelCosts) {
     return total;
 }
 
-// ▼▼▼ updateCharacterLevelOnPlan関数を更新 ▼▼▼
+// ★ updateCharacterLevelOnPlan の再描画ロジックを修正
 function updateCharacterLevelOnPlan(charId, value, isAbsolute = false) {
     const charIndex = selectedCharacters.findIndex(c => c.id === charId);
     if (charIndex > -1) {
-        // ... (レベル更新のロジックは変更なし)
-
-        // ★ 素材数の再計算・再表示
-        debounce(displayRequiredMaterials, 300)(allLevelCosts);
+        let newLevel = isAbsolute ? value : selectedCharacters[charIndex].currentLvl + value;
+        if (newLevel < 1) newLevel = 1;
+        if (newLevel > selectedCharacters[charIndex].targetLvl) newLevel = selectedCharacters[charIndex].targetLvl;
+        selectedCharacters[charIndex].currentLvl = newLevel;
+        saveSelection();
+        document.getElementById(`current-lvl-display-${charId}`).textContent = newLevel;
+        document.getElementById(`slider-char-level-${charId}`).value = newLevel;
+        debounce(displayRequiredMaterials, 300)();
     }
 }
 
@@ -294,9 +366,9 @@ function updateInventory(materialId, value, isAbsolute = false) {
 }
 
 function debounce(func, delay) {
-    return function() {
+    return function(...args) {
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => func.apply(this, arguments), delay);
+        debounceTimer = setTimeout(() => func.apply(this, args), delay);
     };
 }
 
