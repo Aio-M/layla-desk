@@ -426,3 +426,37 @@ body {
     background-color: #4a5568;
     color: #e2e8f0;
 }
+
+/* 削除ボタン用のスタイル */
+.btn-danger {
+    background-color: #e53e3e;
+    color: white;
+    margin-right: auto; /* このボタンだけ左寄せにする */
+}
+
+/* 育成計画ページのミニカードに削除ボタンを追加するためのスタイル */
+.mini-char-card {
+    position: relative; /* 子要素の配置の基準にする */
+    padding-right: 35px; /* 削除ボタンのスペースを確保 */
+}
+
+.delete-char-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    border: none;
+    background-color: rgba(0,0,0,0.3);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1rem;
+}
+.delete-char-btn:hover {
+    background-color: #e53e3e;
+}
