@@ -239,7 +239,7 @@ function displaySelectedCharacters() {
         if (charData) {
             const item = document.createElement('div');
             item.className = 'plan-char-item';
-            // ▼▼▼ ボタンとスライダー、レベル表記を修正 ▼▼▼
+            // ▼▼▼ この中のボタンとスライダーを再実装 ▼▼▼
             item.innerHTML = `
                 <img src="${charData.image_path}" alt="${charData.name}">
                 <div class="plan-char-details">
@@ -273,7 +273,8 @@ function displaySelectedCharacters() {
             }
         });
     });
-
+    
+    // ▼▼▼ キャラクターレベルのボタンとスライダーのイベントリスナーを再実装 ▼▼▼
     listElement.querySelectorAll('.btn-step[data-type="char-level"]').forEach(button => {
         button.addEventListener('click', (e) => {
             updateCharacterLevelOnPlan(e.target.dataset.id, parseInt(e.target.dataset.amount, 10));
@@ -306,7 +307,7 @@ function displayRequiredMaterials() {
                 <div class="material-info"><div class="material-name">${materialInfo.name}</div></div>
                 <div class="mora-display">必要数: ${totalRequired[materialId].toLocaleString()}</div>`;
         } else {
-            // ▼▼▼ ボタンとスライダーを再実装 ▼▼▼
+            // ▼▼▼ 素材のボタンとスライダーを再実装 ▼▼▼
             item.innerHTML = `
                 <img src="${materialInfo.icon}" alt="${materialInfo.name}" class="material-icon">
                 <div class="material-info">
@@ -327,6 +328,7 @@ function displayRequiredMaterials() {
         listElement.appendChild(item);
     }
 
+    // ▼▼▼ 素材のボタンとスライダーのイベントリスナーを再実装 ▼▼▼
     listElement.querySelectorAll('.btn-step[data-type="material"]').forEach(button => {
         button.addEventListener('click', (e) => {
             updateInventory(e.target.dataset.id, parseInt(e.target.dataset.amount, 10));
@@ -353,6 +355,7 @@ function calculateTotalMaterials() {
         const charData = allCharacterData.find(c => c.id === charPlan.id);
         if (!charData) return;
 
+        // レベルアップコスト
         const expData = allLevelCosts.character_exp;
         const targetExp = expData.find(e => e.level === charPlan.targetLvl)?.exp || 0;
         const currentExp = expData.find(e => e.level === charPlan.currentLvl)?.exp || 0;
@@ -363,6 +366,7 @@ function calculateTotalMaterials() {
             total.hero_wit += Math.ceil(requiredExp / allLevelCosts.exp_books.hero_wit);
         }
 
+        // レベル突破コスト
         if (charData.materials) {
             const ascPhases = allAscensionCosts[`rarity_${charData.rarity}`]?.phases || [];
             ascPhases.forEach(p => {
@@ -389,6 +393,7 @@ function calculateTotalMaterials() {
             });
         }
 
+        // 天賦レベルアップコスト
         if (charData.materials) {
             const talentLevels = allTalentCosts.levels;
             for (let i = 1; i <= 3; i++) {
