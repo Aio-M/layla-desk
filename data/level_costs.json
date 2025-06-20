@@ -1,0 +1,26 @@
+{
+  "character_exp": [
+    { "level": 1, "exp": 0 }, { "level": 2, "exp": 1000 }, { "level": 3, "exp": 2325 }, { "level": 4, "exp": 4125 }, { "level": 5, "exp": 6250 },
+    { "level": 6, "exp": 8750 }, { "level": 7, "exp": 11750 }, { "level": 8, "exp": 15125 }, { "level": 9, "exp": 19000 }, { "level": 10, "exp": 23250 },
+    { "level": 11, "exp": 27875 }, { "level": 12, "exp": 32875 }, { "level": 13, "exp": 38375 }, { "level": 14, "exp": 44250 }, { "level": 15, "exp": 50625 },
+    { "level": 16, "exp": 57500 }, { "level": 17, "exp": 64875 }, { "level": 18, "exp": 72750 }, { "level": 19, "exp": 81125 }, { "level": 20, "exp": 90000 },
+    { "level": 21, "exp": 105350 }, { "level": 22, "exp": 121800 }, { "level": 23, "exp": 139350 }, { "level": 24, "exp": 158000 }, { "level": 25, "exp": 177750 },
+    { "level": 26, "exp": 198750 }, { "level": 27, "exp": 220875 }, { "level": 28, "exp": 244250 }, { "level": 29, "exp": 268875 }, { "level": 30, "exp": 294750 },
+    { "level": 31, "exp": 321875 }, { "level": 32, "exp": 350250 }, { "level": 33, "exp": 379875 }, { "level": 34, "exp": 410750 }, { "level": 35, "exp": 442875 },
+    { "level": 36, "exp": 476250 }, { "level": 37, "exp": 510875 }, { "level": 38, "exp": 546750 }, { "level": 39, "exp": 583875 }, { "level": 40, "exp": 622250 },
+    { "level": 41, "exp": 681575 }, { "level": 42, "exp": 743125 }, { "level": 43, "exp": 806800 }, { "level": 44, "exp": 872600 }, { "level": 45, "exp": 940650 },
+    { "level": 46, "exp": 1010950 }, { "level": 47, "exp": 1083500 }, { "level": 48, "exp": 1158400 }, { "level": 49, "exp": 1235650 }, { "level": 50, "exp": 1315250 },
+    { "level": 51, "exp": 1417550 }, { "level": 52, "exp": 1522850 }, { "level": 53, "exp": 1631150 }, { "level": 54, "exp": 1742575 }, { "level": 55, "exp": 1857125 },
+    { "level": 56, "exp": 1974925 }, { "level": 57, "exp": 2095975 }, { "level": 58, "exp": 2220400 }, { "level": 59, "exp": 2348200 }, { "level": 60, "exp": 2479500 },
+    { "level": 61, "exp": 2642950 }, { "level": 62, "exp": 2810950 }, { "level": 63, "exp": 2983500 }, { "level": 64, "exp": 3160725 }, { "level": 65, "exp": 3342625 },
+    { "level": 66, "exp": 3529350 }, { "level": 67, "exp": 3720900 }, { "level": 68, "exp": 3917400 }, { "level": 69, "exp": 4118850 }, { "level": 70, "exp": 4325375 },
+    { "level": 71, "exp": 4572275 }, { "level": 72, "exp": 4825100 }, { "level": 73, "exp": 5083850 }, { "level": 74, "exp": 5348650 }, { "level": 5, "exp": 5619500 },
+    { "level": 76, "exp": 5896525 }, { "level": 77, "exp": 6179725 }, { "level": 78, "exp": 6469225 }, { "level": 79, "exp": 6765150 }, { "level": 80, "exp": 7067500 },
+    { "level": 81, "exp": 7436500 }, { "level": 82, "exp": 7813025 }, { "level": 83, "exp": 8197200 }, { "level": 84, "exp": 8589150 }, { "level": 85, "exp": 8988900 },
+    { "level": 86, "exp": 9396575 }, { "level": 87, "exp": 9812300 }, { "level": 88, "exp": 10236200 }, { "level": 89, "exp": 10668400 }, { "level": 90, "exp": 11109025 }
+  ],
+  "exp_books": {
+    "hero_wit": 20000
+  },
+  "mora_per_exp": 0.2
+}
