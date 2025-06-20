@@ -25,7 +25,7 @@ const allMaterialsData = {
   // =====週ボス素材 (Weekly Boss)=====
   // 「正機の神」 [七葉寂照秘密主]
   "dakas_bell": { "name": "傀儡の紐", "icon": "images/materials/weekly_boss/Dakas_Bell_icon.webp"},
-  "puppet_strings": { "name": "無心の淵鏡", "icon": "images/materials/weekly_boss/Puppet_Strings_icon.webp"}
+  "puppet_strings": { "name": "無心の淵鏡", "icon": "images/materials/weekly_boss/Puppet_Strings_icon.webp"},
     
   // =====知恵の冠=====
   "crown_of_insight": { "name": "知恵の冠", "icon": "images/materials/Crown_of_Insight_icon.webp"},
