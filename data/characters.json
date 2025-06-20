@@ -10,7 +10,7 @@
       "gem": "shivada_jade",
       "boss": "perpetual_caliber",
       "local": "nilotpala_lotus",
-      "common": "scroll" 
+      "common": "divining_scroll"
     }
   },
   {
@@ -20,7 +20,12 @@
     "element": "草",
     "weapon_type": "片手剣",
     "image_path": "images/characters/nahida.webp",
-    "materials": {}
+    "materials": {
+      "gem": "nagadus_emerald",
+      "boss": "quelled_creeper",
+      "local": "kalpalata_lotus",
+      "common": "fungal_spores"
+    }
   },
   {
     "id": "test1",
