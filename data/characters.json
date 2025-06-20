@@ -5,15 +5,22 @@
     "rarity": 4,
     "element": "氷",
     "weapon_type": "片手剣",
-    "image_path": "images/characters/layla.webp"
+    "image_path": "images/characters/layla.webp",
+    "materials": {
+      "gem": "shivada_jade",
+      "boss": "perpetual_caliber",
+      "local": "nilotpala_lotus",
+      "common": "scroll" 
+    }
   },
   {
     "id": "nahida",
     "name": "ナヒーダ",
     "rarity": 5,
     "element": "草",
-    "weapon_type": "法器",
-    "image_path": "images/characters/nahida.webp"
+    "weapon_type": "片手剣",
+    "image_path": "images/characters/nahida.webp",
+    "materials": {}
   },
   {
     "id": "test1",
@@ -21,6 +28,7 @@
     "rarity": 5,
     "element": "無",
     "weapon_type": "拳",
-    "image_path": "images/characters/test.webp"
+    "image_path": "images/characters/test.webp",
+    "materials": {}
   }
 ]
