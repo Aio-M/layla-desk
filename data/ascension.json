@@ -1,0 +1,22 @@
+{
+  "rarity_4": {
+    "phases": [
+      { "level": 20, "cost": { "mora": 20000, "gem_sliver": 1, "local_specialty": 3, "common_1": 3 } },
+      { "level": 40, "cost": { "mora": 40000, "gem_fragment": 3, "boss_material": 2, "local_specialty": 10, "common_1": 15 } },
+      { "level": 50, "cost": { "mora": 60000, "gem_fragment": 6, "boss_material": 4, "local_specialty": 20, "common_2": 12 } },
+      { "level": 60, "cost": { "mora": 80000, "gem_chunk": 3, "boss_material": 8, "local_specialty": 30, "common_2": 18 } },
+      { "level": 70, "cost": { "mora": 100000, "gem_chunk": 6, "boss_material": 12, "local_specialty": 45, "common_3": 12 } },
+      { "level": 80, "cost": { "mora": 120000, "gem_gemstone": 6, "boss_material": 20, "local_specialty": 60, "common_3": 24 } }
+    ]
+  },
+  "rarity_5": {
+    "phases": [
+      { "level": 20, "cost": { "mora": 20000, "gem_sliver": 1, "local_specialty": 3, "common_1": 3 } },
+      { "level": 40, "cost": { "mora": 40000, "gem_fragment": 3, "boss_material": 2, "local_specialty": 10, "common_1": 15 } },
+      { "level": 50, "cost": { "mora": 60000, "gem_fragment": 6, "boss_material": 4, "local_specialty": 20, "common_2": 12 } },
+      { "level": 60, "cost": { "mora": 80000, "gem_chunk": 3, "boss_material": 8, "local_specialty": 30, "common_2": 18 } },
+      { "level": 70, "cost": { "mora": 100000, "gem_chunk": 6, "boss_material": 12, "local_specialty": 45, "common_3": 12 } },
+      { "level": 80, "cost": { "mora": 120000, "gem_gemstone": 6, "boss_material": 20, "local_specialty": 60, "common_3": 24 } }
+    ]
+  }
+}
