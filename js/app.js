@@ -106,7 +106,7 @@ function renderCharacters() {
         listElement.appendChild(card);
     });
 }
-
+    
 function setupSortButtons() {
     document.querySelectorAll('.sort-btn').forEach(button => {
         button.addEventListener('click', (e) => {
@@ -162,13 +162,33 @@ function loadSelection() {
 async function loadPlanningPage() {
     loadSelection();
     loadInventory();
+    const planningBoard = document.getElementById('planning-board');
     if (selectedCharacters.length === 0) {
-        document.getElementById('planning-board').innerHTML = '<p style="text-align:center;">計画にキャラクターが追加されていません。<br>「キャラクター」ページから育成したいキャラクターを選択してください。</p>';
+        planningBoard.innerHTML = '<p style="text-align:center;">計画にキャラクターが追加されていません。<br>「キャラクター」ページから育成したいキャラクターを選択してください。</p>';
         return;
     }
-    const allCharacters = await fetch('data/characters.json').then(res => res.json());
+    planningBoard.innerHTML = `
+        <h2 class="page-title">育成計画</h2>
+        <div class="section">
+            <h3>育成対象キャラクター</h3>
+            <div id="selected-characters-list"></div>
+        </div>
+        <div class="section">
+            <h3>必要素材一覧</h3>
+            <div id="materials-list"></div>
+        </div>
+        <a href="characters.html" class="back-button">キャラクター選択に戻る</a>
+    `;
+
+    // 全てのデータベースを非同期で並行して読み込む
+    const [allCharacters, allMaterials, ascensionCosts] = await Promise.all([
+        fetch('data/characters.json').then(res => res.json()),
+        fetch('data/materials.json').then(res => res.json()),
+        fetch('data/ascension.json').then(res => res.json())
+    ]);
+
     displaySelectedCharacters(allCharacters);
-    displayRequiredMaterials();
+    displayRequiredMaterials(allCharacters, allMaterials, ascensionCosts);
 }
 
 function displaySelectedCharacters(allCharacters) {
@@ -187,7 +207,6 @@ function displaySelectedCharacters(allCharacters) {
             listElement.appendChild(charDisplay);
         }
     });
-
     listElement.querySelectorAll('.delete-char-btn').forEach(button => {
         button.addEventListener('click', (e) => {
             const charId = e.target.dataset.id;
@@ -200,22 +219,25 @@ function displaySelectedCharacters(allCharacters) {
     });
 }
 
-function displayRequiredMaterials() {
+function displayRequiredMaterials(allCharacters, allMaterials, ascensionCosts) {
     const listElement = document.getElementById('materials-list');
     listElement.innerHTML = '';
-    const required = {
-        'mora': selectedCharacters.length * 50000,
-        'hero_wit': selectedCharacters.length * 10,
-    };
-    const materialNames = { 'mora': 'モラ', 'hero_wit': '大英雄の経験' };
-    for (const materialId in required) {
-        const totalNeeded = required[materialId];
+
+    const totalRequired = calculateTotalMaterials(allCharacters, ascensionCosts);
+
+    for (const materialId in totalRequired) {
+        const totalNeeded = totalRequired[materialId];
         if (totalNeeded === 0) continue;
+        
+        const materialInfo = allMaterials[materialId];
+        if (!materialInfo) continue;
+
         const currentAmount = materialInventory[materialId] || 0;
         const item = document.createElement('div');
         item.className = 'material-item';
         item.innerHTML = `
-            <span class="material-name">${materialNames[materialId]}</span>
+            <img src="${materialInfo.icon}" alt="${materialInfo.name}" class="material-icon">
+            <span class="material-name">${materialInfo.name}</span>
             <span class="material-total">必要数: ${totalNeeded.toLocaleString()}</span>
             <div class="material-counter">
                 <button class="counter-btn" data-id="${materialId}" data-amount="-1">-</button>
@@ -225,6 +247,7 @@ function displayRequiredMaterials() {
         `;
         listElement.appendChild(item);
     }
+
     listElement.querySelectorAll('.counter-btn').forEach(button => {
         button.addEventListener('click', (e) => {
             const id = e.target.dataset.id;
@@ -232,6 +255,46 @@ function displayRequiredMaterials() {
             updateInventory(id, amount);
         });
     });
+}
+
+function calculateTotalMaterials(allCharacters, ascensionCosts) {
+    const total = {};
+
+    selectedCharacters.forEach(charPlan => {
+        const charData = allCharacters.find(c => c.id === charPlan.id);
+        if (!charData || !charData.materials) return;
+
+        const rarityKey = `rarity_${charData.rarity}`;
+        const ascensionPhases = ascensionCosts[rarityKey].phases;
+
+        ascensionPhases.forEach(phase => {
+            if (charPlan.currentLvl < phase.level && charPlan.targetLvl >= phase.level) {
+                for (const matType in phase.cost) {
+                    let materialId = '';
+                    const amount = phase.cost[matType];
+
+                    if (matType === 'mora') {
+                        materialId = 'mora';
+                    } else if (matType === 'boss_material') {
+                        materialId = charData.materials.boss;
+                    } else if (matType === 'local_specialty') {
+                        materialId = charData.materials.local;
+                    } else if (matType.startsWith('gem_')) {
+                        materialId = `${charData.materials.gem}_${matType.split('_')[1]}`;
+                    } else if (matType.startsWith('common_')) {
+                        const commonTiers = { '1': 'fungal_spores', '2': 'luminescent_pollen', '3': 'crystalline_cyst_dust' };
+                        materialId = commonTiers[matType.split('_')[1]];
+                    }
+                    
+                    if (materialId) {
+                        if (!total[materialId]) total[materialId] = 0;
+                        total[materialId] += amount;
+                    }
+                }
+            }
+        });
+    });
+    return total;
 }
 
 function updateInventory(materialId, change) {
@@ -253,9 +316,6 @@ function loadInventory() {
     }
 }
 
-// ===============================
-//  共通機能 (Common Functions)
-// ===============================
 function handleActiveNavLinks() {
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     document.querySelectorAll('.nav-link').forEach(link => {
