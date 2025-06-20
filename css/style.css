@@ -16,14 +16,14 @@ body {
 
 /* === ヘッダー / ナビゲーション === */
 .header {
-    padding: 0 20px; /* 上下のpaddingを無くし、左右のみに */
+    padding: 0 20px;
     border-bottom: 1px solid #4a5568;
-    background-color: #2d3748; /* ヘッダーに背景色を指定 */
+    background-color: #2d3748;
 }
 
 .nav-bar {
     display: flex;
-    justify-content: space-between; /* 両端に寄せる */
+    justify-content: space-between;
     align-items: center;
     max-width: 1200px;
     margin: 0 auto;
@@ -55,7 +55,6 @@ body {
     background-color: #4a5568;
 }
 
-/* 現在表示しているページをハイライトするスタイル */
 .nav-link.active {
     color: white;
     font-weight: bold;
@@ -70,10 +69,74 @@ body {
     margin-bottom: 40px;
 }
 
+/* === ホームページ専用スタイル === */
+#home-page .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 50px;
+}
+
+#home-page .nav-card {
+    background: #2d3748;
+    border: 1px solid #4a5568;
+    border-radius: 12px;
+    padding: 30px;
+    text-decoration: none;
+    color: #cbd5e0;
+    transition: all 0.3s ease;
+}
+
+#home-page .nav-card:hover {
+    transform: translateY(-5px);
+    border-color: #63b3ed;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+}
+
+#home-page .nav-card h3 {
+    margin-top: 0;
+    font-size: 1.8rem;
+    color: #e2e8f0;
+}
+
+#home-page .nav-card p {
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+
 /* === キャラクター選択ページ === */
+.sort-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.sort-btn {
+    padding: 8px 16px;
+    border: 1px solid #4a5568;
+    background-color: transparent;
+    color: #a0aec0;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sort-btn:hover {
+    background-color: #4a5568;
+    color: #e2e8f0;
+}
+
+.sort-btn.active {
+    background-color: #5a67d8;
+    border-color: #5a67d8;
+    color: white;
+    font-weight: bold;
+}
+
 #character-list {
     display: grid;
-    /* カードが大きくなるため、列数を調整 */
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 15px;
 }
@@ -102,7 +165,6 @@ body {
 }
 
 .character-info {
-    /* display: none; が残っている場合は削除し、以下のスタイルにする */
     padding-top: 10px;
 }
 
@@ -139,17 +201,11 @@ body {
     padding: 4px;
 }
 
-/* カード内の非表示にした要素を削除 */
-.character-info {
-    display: none;
-}
-
-/* 次へ進むボタンのデザイン */
 .next-step-button {
     display: block;
-    box-sizing: border-box; /* paddingを含めて幅を計算 */
-    width: 95%; /* 画面幅の95%に */
-    max-width: 400px; /* ただし最大幅は400px */
+    box-sizing: border-box;
+    width: 95%;
+    max-width: 400px;
     margin: 40px auto 20px;
     padding: 15px 20px;
     font-size: 1.1rem;
@@ -218,7 +274,7 @@ body {
 
 .material-name {
     font-weight: bold;
-    flex-grow: 1; /* 名前がスペースを埋めるように */
+    flex-grow: 1;
 }
 
 .material-total {
@@ -229,7 +285,7 @@ body {
     display: flex;
     align-items: center;
     gap: 15px;
-    margin-left: auto; /* 右寄せにする */
+    margin-left: auto;
 }
 
 .counter-btn {
@@ -264,104 +320,32 @@ body {
     color: #e2e8f0;
 }
 
-/* ソートボタン */
-.sort-controls {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 30px;
-}
-
-.sort-btn {
-    padding: 8px 16px;
-    border: 1px solid #4a5568;
-    background-color: transparent;
-    color: #a0aec0;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.sort-btn:hover {
-    background-color: #4a5568;
-    color: #e2e8f0;
-}
-
-.sort-btn.active {
-    background-color: #5a67d8;
-    border-color: #5a67d8;
-    color: white;
-    font-weight: bold;
-}
-
-/* === ホームページ専用スタイル === */
-#home-page .card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 30px;
-    margin-top: 50px;
-}
-
-#home-page .nav-card {
-    background: #2d3748;
-    border: 1px solid #4a5568;
-    border-radius: 12px;
-    padding: 30px;
-    text-decoration: none;
-    color: #cbd5e0;
-    transition: all 0.3s ease;
-}
-
-#home-page .nav-card:hover {
-    transform: translateY(-5px);
-    border-color: #63b3ed;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
-}
-
-#home-page .nav-card h3 {
-    margin-top: 0;
-    font-size: 1.8rem;
-    color: #e2e8f0;
-}
-
-#home-page .nav-card p {
-    font-size: 1rem;
-    line-height: 1.6;
-}
 
 /* === レスポンシブ対応 (スマートフォン向け) === */
-/* 画面の幅が600px以下の場合に、以下のスタイルを適用 */
 @media (max-width: 600px) {
 
-    /* ヘッダーの左右の余白を少し狭くする */
     .header {
         padding: 0 10px;
     }
 
-    /* ロゴの文字を少し小さくする */
     .nav-logo {
         font-size: 1.2rem;
-        /* ロゴが縮まないように設定 */
         flex-shrink: 0;
     }
 
-    /* リンク間の余白を調整し、スクロール設定を追加 */
     .nav-links {
         gap: 15px;
-        flex-wrap: nowrap;     /* リンクを折り返さずに、必ず1行で表示する */
-        overflow-x: auto;      /* 横方向にはみ出した場合に、スクロールを有効にする */
-        -webkit-overflow-scrolling: touch; /* iOSで慣性のある滑らかなスクロールを実現 */
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch; 
     }
 
-    /* リンクの文字サイズと余白を調整 */
     .nav-link {
         font-size: 0.9rem;
-        padding: 5px 10px; /* 左右に少し余白を確保 */
-        /* リンクの文字が潰れないように設定 */
+        padding: 5px 10px;
         white-space: nowrap;
     }
 
-    /* ホームページカードの文字を調整 */
     #home-page .nav-card h3 {
         font-size: 1.5rem;
     }
@@ -372,22 +356,5 @@ body {
     }
     .nav-links {
         scrollbar-width: none; /* Firefox用 */
-    }
-}
-    /* ▼▼▼ ここからが重要な追加部分です ▼▼▼ */
-    flex-wrap: nowrap;     /* リンクを折り返さずに、必ず1行で表示する */
-    overflow-x: auto;      /* 横方向にはみ出した場合に、スクロールを有効にする */
-    -webkit-overflow-scrolling: touch; /* iOSで慣性のある滑らかなスクロールを実現 */
-    }
-
-    /* リンクの文字サイズと余白を調整 */
-    .nav-link {
-        font-size: 0.9rem;
-        padding: 5px;
-    }
-
-    /* ホームページカードの文字を調整 */
-    #home-page .nav-card h3 {
-        font-size: 1.5rem;
     }
 }
