@@ -207,3 +207,33 @@ body {
 .back-button:hover {
     color: #e2e8f0;
 }
+
+/* ソートボタン */
+.sort-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.sort-btn {
+    padding: 8px 16px;
+    border: 1px solid #4a5568;
+    background-color: transparent;
+    color: #a0aec0;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sort-btn:hover {
+    background-color: #4a5568;
+    color: #e2e8f0;
+}
+
+.sort-btn.active {
+    background-color: #5a67d8;
+    border-color: #5a67d8;
+    color: white;
+    font-weight: bold;
+}
