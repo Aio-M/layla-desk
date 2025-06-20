@@ -48,7 +48,7 @@ body {
 #character-list {
     display: grid;
     /* スマホ画面で4〜5列になるように、カードの最小幅を調整 */
-    grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
     gap: 12px; /* カード間の余白 */
 }
 
