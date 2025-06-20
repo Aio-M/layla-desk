@@ -40,7 +40,26 @@
             <a href="planning.html" class="next-step-button">選択完了！育成計画へ</a>
         </main>
     </div>
-
+    <div id="level-modal-overlay" class="modal-overlay">
+    <div id="level-modal" class="modal">
+        <h3 id="modal-char-name">キャラクター名</h3>
+        <div class="modal-content">
+            <p>現在のレベルと目標レベルを入力してください。</p>
+            <div class="modal-level-inputs">
+                <label for="current-lvl-input">現在レベル</label>
+                <input type="number" id="current-lvl-input" value="1">
+            </div>
+            <div class="modal-level-inputs">
+                <label for="target-lvl-input">目標レベル</label>
+                <input type="number" id="target-lvl-input" value="90">
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button id="modal-cancel-btn" class="btn-secondary">キャンセル</button>
+            <button id="modal-save-btn" class="btn-primary">決定</button>
+        </div>
+    </div>
+    </div>
     <script src="js/app.js"></script>
     
 </body>
