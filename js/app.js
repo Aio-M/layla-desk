@@ -1,9 +1,9 @@
 // -- グローバル変数 --
-// 選択されたキャラクター情報を管理する配列（オブジェクト形式に変更）
 let selectedCharacters = []; 
 let materialInventory = {};
 let allCharacterData = [];
 let currentSortOrder = 'default';
+let currentlyEditingCharId = null; // モーダルで編集中のキャラID
 
 // -- イベントリスナー --
 document.addEventListener('DOMContentLoaded', () => {
@@ -12,11 +12,13 @@ document.addEventListener('DOMContentLoaded', () => {
         loadSelection();
         setupSortButtons();
         loadCharacters();
+        setupModalEventListeners(); // ★モーダルのイベントリスナーを準備
     }
     if (document.getElementById('planning-board')) {
         loadPlanningPage();
     }
 });
+
 
 // ===================================
 //  キャラクター選択ページ (characters.html)
@@ -46,6 +48,7 @@ async function loadCharacters() {
     }
 }
 
+// ▼▼▼ renderCharacters関数を、シンプルなカード表示に戻し、クリックでモーダルを開くように変更 ▼▼▼
 function renderCharacters() {
     const listElement = document.getElementById('character-list');
     listElement.innerHTML = '';
@@ -54,41 +57,29 @@ function renderCharacters() {
     sortedCharacters.forEach(character => {
         const card = document.createElement('div');
         card.className = 'character-card';
-
-        // 選択されているキャラの情報を取得
-        const selectionData = selectedCharacters.find(c => c.id === character.id);
-        if (selectionData) {
+        // 選択リストに含まれているか確認し、selectedクラスを付ける
+        if (selectedCharacters.find(c => c.id === character.id)) {
             card.classList.add('selected');
         }
-
-        // 現在と目標レベル（選択されていなければデフォルト値）
-        const currentLvl = selectionData ? selectionData.currentLvl : 1;
-        const targetLvl = selectionData ? selectionData.targetLvl : 90;
-
+        card.title = character.name;
+        // カードのHTMLからレベル入力欄を削除
         card.innerHTML = `
             <img src="${character.image_path}" alt="${character.name}" class="character-image">
             <div class="character-info">
                 <h4 class="character-name">${character.name}</h4>
-                <div class="level-inputs">
-                    <label>現在</label>
-                    <input type="number" value="${currentLvl}" onchange="updateCharacterLevel('${character.id}', 'currentLvl', this.value)">
-                    <label>目標</label>
-                    <input type="number" value="${targetLvl}" onchange="updateCharacterLevel('${character.id}', 'targetLvl', this.value)">
-                </div>
             </div>
         `;
-        // カード本体のクリックイベント
-        card.addEventListener('click', (e) => {
-            // input要素をクリックした場合は、選択イベントを発生させない
-            if (e.target.tagName.toLowerCase() === 'input') return;
-            toggleCharacterSelection(character.id, card);
+        
+        // カードがクリックされたら、選択処理ではなくモーダルを開く
+        card.addEventListener('click', () => {
+            openLevelModal(character.id);
         });
+        
         listElement.appendChild(card);
     });
 }
 
 function sortCharacters(characters, sortBy) {
-    // ユーザーのテストデータ「無」「拳」もソート順に追加
     const elementOrder = ["炎", "水", "風", "雷", "草", "氷", "岩", "無"];
     const weaponOrder = ["片手剣", "両手剣", "長柄武器", "弓", "法器", "拳"];
     switch (sortBy) {
@@ -101,28 +92,70 @@ function sortCharacters(characters, sortBy) {
     }
 }
 
-function toggleCharacterSelection(charId, cardElement) {
-    const isSelected = cardElement.classList.toggle('selected');
-    const existingIndex = selectedCharacters.findIndex(c => c.id === charId);
+// ▼▼▼ 新しいモーダル関連の関数群 ▼▼▼
 
-    if (isSelected && existingIndex === -1) {
-        // 新しく選択された場合
-        selectedCharacters.push({ id: charId, currentLvl: 1, targetLvl: 90 });
-    } else if (!isSelected && existingIndex > -1) {
-        // 選択解除された場合
-        selectedCharacters.splice(existingIndex, 1);
-    }
-    saveSelection();
-    renderCharacters(); // レベル入力欄の表示を更新するために再描画
+function setupModalEventListeners() {
+    const overlay = document.getElementById('level-modal-overlay');
+    const saveBtn = document.getElementById('modal-save-btn');
+    const cancelBtn = document.getElementById('modal-cancel-btn');
+
+    // 背景（オーバーレイ）をクリックしたらモーダルを閉じる
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            closeLevelModal();
+        }
+    });
+    
+    saveBtn.addEventListener('click', saveLevelData);
+    cancelBtn.addEventListener('click', closeLevelModal);
 }
 
-function updateCharacterLevel(charId, type, value) {
-    const selection = selectedCharacters.find(c => c.id === charId);
-    if (selection) {
-        selection[type] = parseInt(value, 10);
-        saveSelection();
-    }
+function openLevelModal(charId) {
+    currentlyEditingCharId = charId;
+    const charData = allCharacterData.find(c => c.id === charId);
+    const selectionData = selectedCharacters.find(c => c.id === charId);
+
+    // モーダルにキャラクター名と、保存されたレベル（なければデフォルト値）を設定
+    document.getElementById('modal-char-name').textContent = charData.name;
+    document.getElementById('current-lvl-input').value = selectionData ? selectionData.currentLvl : 1;
+    document.getElementById('target-lvl-input').value = selectionData ? selectionData.targetLvl : 90;
+
+    // モーダルを表示
+    document.getElementById('level-modal-overlay').style.display = 'flex';
 }
+
+function closeLevelModal() {
+    document.getElementById('level-modal-overlay').style.display = 'none';
+    currentlyEditingCharId = null;
+}
+
+function saveLevelData() {
+    if (!currentlyEditingCharId) return;
+
+    const currentLvl = parseInt(document.getElementById('current-lvl-input').value, 10);
+    const targetLvl = parseInt(document.getElementById('target-lvl-input').value, 10);
+
+    const existingIndex = selectedCharacters.findIndex(c => c.id === currentlyEditingCharId);
+
+    if (existingIndex > -1) {
+        // 既に選択リストにいる場合はレベルを更新
+        selectedCharacters[existingIndex].currentLvl = currentLvl;
+        selectedCharacters[existingIndex].targetLvl = targetLvl;
+    } else {
+        // 新しく選択リストに追加する場合
+        selectedCharacters.push({ id: currentlyEditingCharId, currentLvl: currentLvl, targetLvl: targetLvl });
+    }
+    
+    saveSelection();    // 変更をLocalStorageに保存
+    renderCharacters(); // カードの選択状態を更新するために再描画
+    closeLevelModal();
+}
+
+
+// ▼▼▼ toggle~ や update~ 関数はモーダル方式では不要になるため削除します ▼▼▼
+// function toggleCharacterSelection(...) { ... }
+// function updateCharacterLevel(...) { ... }
+
 
 function saveSelection() {
     localStorage.setItem('laylaDesk_selectedCharacters', JSON.stringify(selectedCharacters));
@@ -156,7 +189,6 @@ function displaySelectedCharacters(allCharacters) {
         if(charData) {
             const charDisplay = document.createElement('div');
             charDisplay.className = 'mini-char-card';
-            // レベル情報も表示（例）
             charDisplay.innerHTML = `<img src="${charData.image_path}" alt="${charData.name}"><span>${charData.name} Lv${obj.currentLvl}→${obj.targetLvl}</span>`;
             listElement.appendChild(charDisplay);
         }
