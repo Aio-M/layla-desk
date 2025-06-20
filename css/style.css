@@ -396,6 +396,10 @@ body {
     .nav-links {
         scrollbar-width: none; /* Firefox用 */
     }
+
+    .material-name {
+    font-size: 0.9rem;
+    }
 }
 
 /* === モーダルウィンドウのスタイル === */
