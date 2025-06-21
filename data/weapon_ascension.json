@@ -1,0 +1,22 @@
+{
+  "rarity_4": {
+    "phases": [
+      { "level": 20, "cost": { "mora": 5000, "domain_2": 3, "elite_1": 3, "common_1": 2 } },
+      { "level": 40, "cost": { "mora": 15000, "domain_3": 3, "elite_1": 12, "common_1": 8 } },
+      { "level": 50, "cost": { "mora": 20000, "domain_3": 6, "elite_2": 6, "common_2": 6 } },
+      { "level": 60, "cost": { "mora": 30000, "domain_4": 3, "elite_2": 12, "common_2": 9 } },
+      { "level": 70, "cost": { "mora": 35000, "domain_4": 6, "elite_3": 9, "common_3": 6 } },
+      { "level": 80, "cost": { "mora": 45000, "domain_5": 4, "elite_3": 18, "common_3": 12 } }
+    ]
+  },
+  "rarity_5": {
+    "phases": [
+      { "level": 20, "cost": { "mora": 10000, "domain_2": 5, "elite_1": 5, "common_1": 3 } },
+      { "level": 40, "cost": { "mora": 20000, "domain_3": 5, "elite_1": 18, "common_1": 12 } },
+      { "level": 50, "cost": { "mora": 30000, "domain_3": 9, "elite_2": 9, "common_2": 9 } },
+      { "level": 60, "cost": { "mora": 45000, "domain_4": 5, "elite_2": 18, "common_2": 14 } },
+      { "level": 70, "cost": { "mora": 55000, "domain_4": 9, "elite_3": 14, "common_3": 9 } },
+      { "level": 80, "cost": { "mora": 65000, "domain_5": 6, "elite_3": 27, "common_3": 18 } }
+    ]
+  }
+}
