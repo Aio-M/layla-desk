@@ -11,7 +11,7 @@ let debounceTimer;
 
 // -- イベントリスナー --
 document.addEventListener('DOMContentLoaded', () => {
-    handleActiveNavLinks();
+    renderHeader();
     if (document.getElementById('character-list')) {
         loadCharacters().then(() => {
             loadSelection();
@@ -479,14 +479,4 @@ function loadInventory() {
             materialInventory = {};
         }
     }
-}
-
-function handleActiveNavLinks() {
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    document.querySelectorAll('.nav-link').forEach(link => {
-        const linkPage = link.getAttribute('href');
-        if (linkPage === currentPage) {
-            link.classList.add('active');
-        }
-    });
 }
