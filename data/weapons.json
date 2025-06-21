@@ -1,0 +1,24 @@
+[
+  {
+    "id": "favonius_sword",
+    "name": "西風剣",
+    "rarity": 4,
+    "type": "片手剣",
+    "materials": {
+      "domain": "decarabian",
+      "elite": "horn",
+      "common": "scroll"
+    }
+  },
+  {
+    "id": "sacrificial_sword",
+    "name": "祭礼の剣",
+    "rarity": 4,
+    "type": "片手剣",
+    "materials": {
+      "domain": "dandelion_gladiator",
+      "elite": "horn",
+      "common": "scroll"
+    }
+  }
+]
