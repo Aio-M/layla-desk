@@ -184,6 +184,49 @@ body {
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
 }
 
+/* === 武器選択ページ === */
+.item-grid { /* キャラと武器で共通化 */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+}
+.weapon-card {
+    background-color: #2d3748;
+    border: 2px solid #4a5568;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 10px;
+    position: relative;
+}
+.weapon-card.selected {
+    border-color: #63b3ed;
+    box-shadow: 0 0 10px rgba(99, 179, 237, 0.5);
+}
+.weapon-image {
+    width: 100%;
+    height: 150px;
+    object-fit: contain; /* 武器は全体が見えるように */
+    background-color: #1a202c;
+    border-radius: 6px;
+}
+.weapon-name {
+    margin: 10px 0 0 0;
+    font-size: 1rem; /* 少し小さく */
+    font-weight: bold;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.rarity-stars {
+    display: flex;
+    justify-content: center;
+    margin-top: 5px;
+    color: #ffd700;
+}
+
 /* === 育成計画ページ === */
 .section {
     background-color: #2d3748;
