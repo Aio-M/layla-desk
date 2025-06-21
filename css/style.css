@@ -367,6 +367,9 @@ body {
     text-align: center;
     color: #e2e8f0;
 }
+.modal-content {
+    /* 何かあればここに */
+}
 .modal-section {
     border-top: 1px solid #4a5568;
     padding-top: 15px;
@@ -382,17 +385,19 @@ body {
     color: #a0aec0;
     font-size: 1rem;
 }
-.modal-level-inputs, .modal-talent-inputs {
+.modal-level-inputs {
     display: grid;
+    grid-template-columns: 1fr auto;
     align-items: center;
     gap: 10px;
     margin-bottom: 10px;
 }
-.modal-level-inputs {
-    grid-template-columns: 1fr 1fr;
-}
 .modal-talent-inputs {
+    display: grid;
     grid-template-columns: 40px 1fr auto 1fr;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 .modal-talent-inputs span, .modal-level-inputs label {
     font-size: 0.9rem;
@@ -419,6 +424,7 @@ body {
     border: none;
     cursor: pointer;
     font-weight: bold;
+    font-size: 0.9rem; /* ボタンの文字サイズを調整 */
 }
 .btn-primary {
     background-color: #5a67d8;
