@@ -22,6 +22,17 @@ const allMaterialsData = {
   "guide_to_ingenuity": { "name": "「創意」の導き", "icon": "images/materials/talent/Guide_to_Ingenuity_icon.webp"},
   "philosophies_of_ingenuity": { "name": "「創意」の哲学", "icon": "images/materials/talent/Philosophies_of_Ingenuity_icon.webp"},
 
+  // =====武器突破素材 (Domain)=====
+  // モンド
+  "tile_of_decarabians_tower": { "name": "デカラビアンの塔の瓦", "icon": "images/materials/domain/Tile_of_Decarabians_Tower_icon.webp" },
+  "debris_of_decarabians_city": { "name": "デカラビアンの市の残壁", "icon": "images/materials/domain/Debris_of_Decarabians_City_icon.webp" },
+  "fragment_of_decarabians_epic": { "name": "デカラビアンの夢の欠片", "icon": "images/materials/domain/Fragment_of_Decarabians_Epic_icon.webp" },
+  "scattered_piece_of_decarabians_dream": { "name": "デカラビアンの砕けた夢", "icon": "images/materials/domain/Scattered_Piece_of_Decarabians_Dream_icon.webp" },
+  "fetters_of_the_dandelion_gladiator": { "name": "凛風奔狼の枷", "icon": "images/materials/domain/Fetters_of_the_Dandelion_Gladiator_icon.webp" },
+  "chains_of_the_dandelion_gladiator": { "name": "凛風奔狼の鎖", "icon": "images/materials/domain/Chains_of_the_Dandelion_Gladiator_icon.webp" },
+  "shackles_of_the_dandelion_gladiator": { "name": "凛風奔狼の足枷", "icon": "images/materials/domain/Shackles_of_the_Dandelion_Gladiator_icon.webp" },
+  "dream_of_the_dandelion_gladiator": { "name": "凛風奔狼の理想", "icon": "images/materials/domain/Dream_of_the_Dandelion_Gladiator_icon.webp" },
+
   // =====週ボス素材 (Weekly Boss)=====
   // 「正機の神」 [七葉寂照秘密主]
   "dakas_bell": { "name": "傀儡の紐", "icon": "images/materials/weekly_boss/Dakas_Bell_icon.webp"},
@@ -34,6 +45,11 @@ const allMaterialsData = {
   // スメール
   "nilotpala_lotus": { "name": "サウマラタ蓮", "icon": "images/materials/local/Nilotpala_Lotus_icon.webp" },
 
+  // =====精鋭素材 (Elite)=====
+  "heavy_horn": { "name": "重い角笛", "icon": "images/materials/elite/Heavy_Horn_icon.webp" },
+  "black_bronze_horn": { "name": "黒銅の角笛", "icon": "images/materials/elite/Black_Bronze_Horn_icon.webp" },
+  "black_crystal_horn": { "name": "黒晶の角笛", "icon": "images/materials/elite/Black_Crystal_Horn_icon.webp" },
+  
   // =====コモン素材 (Common)=====
   // キノコン
   "fungal_spores": { "name": "キノコンの胞子", "icon": "images/materials/common/Fungal_Spores_icon.webp" },
