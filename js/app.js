@@ -1,13 +1,14 @@
 // -- グローバル変数 --
-let selectedCharacters = []; 
+let selectedCharacters = [];
+let selectedWeapons = []; // ★追加：選択された武器を管理
 let materialInventory = {};
 let allCharacterData = [];
+let allWeaponData = []; // ★追加：全武器データを保持
 let allAscensionCosts = {};
 let allLevelCosts = {};
 let allTalentCosts = {};
 let currentSortOrder = 'default';
-let currentlyEditingCharId = null;
-let debounceTimer;
+let currentlyEditingId = null; // ★汎用的なID変数に変更
 
 // -- イベントリスナー --
 document.addEventListener('DOMContentLoaded', () => {
@@ -17,8 +18,17 @@ document.addEventListener('DOMContentLoaded', () => {
             loadSelection();
             renderCharacters();
         });
-        setupSortButtons();
-        setupModalEventListeners();
+        setupSortButtons('character');
+        setupModalEventListeners('character');
+    }
+    // ★武器ページの処理を追加
+    if (document.getElementById('weapon-list')) {
+        loadWeapons().then(() => {
+            loadWeaponSelection();
+            renderWeapons();
+        });
+        setupSortButtons('weapon');
+        setupModalEventListeners('weapon');
     }
     if (document.getElementById('planning-board')) {
         loadPlanningPage();
@@ -27,114 +37,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // ===================================
-//  キャラクター選択ページ (characters.html)
+//  武器選択ページ (weapons.html)
 // ===================================
 
-function setupModalEventListeners() {
-    const overlay = document.getElementById('level-modal-overlay');
-    const saveBtn = document.getElementById('modal-save-btn');
-    const cancelBtn = document.getElementById('modal-cancel-btn');
-    const removeBtn = document.getElementById('modal-remove-btn');
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) closeLevelModal();
-    });
-    saveBtn.addEventListener('click', saveLevelData);
-    cancelBtn.addEventListener('click', closeLevelModal);
-    removeBtn.addEventListener('click', removeCharacterFromPlan);
-}
-
-function openLevelModal(charId) {
-    currentlyEditingCharId = charId;
-    const charData = allCharacterData.find(c => c.id === charId);
-    const selectionData = selectedCharacters.find(c => c.id === charId);
-
-    document.getElementById('modal-char-name').textContent = charData.name;
-    document.getElementById('current-lvl-input').value = selectionData ? selectionData.currentLvl : 1;
-    document.getElementById('target-lvl-input').value = selectionData ? selectionData.targetLvl : 90;
-
-    for (let i = 1; i <= 3; i++) {
-        document.getElementById(`talent${i}-current-input`).value = selectionData ? (selectionData[`talent${i}_current`] || 1) : 1;
-        document.getElementById(`talent${i}-target-input`).value = selectionData ? (selectionData[`talent${i}_target`] || 1) : 1;
-    }
-
-    document.getElementById('modal-remove-btn').style.display = selectionData ? 'block' : 'none';
-    document.getElementById('level-modal-overlay').style.display = 'flex';
-}
-
-function closeLevelModal() {
-    document.getElementById('level-modal-overlay').style.display = 'none';
-    currentlyEditingCharId = null;
-}
-
-function saveLevelData() {
-    if (!currentlyEditingCharId) return;
-    const newSelection = {
-        id: currentlyEditingCharId,
-        currentLvl: parseInt(document.getElementById('current-lvl-input').value, 10),
-        targetLvl: parseInt(document.getElementById('target-lvl-input').value, 10),
-        talent1_current: parseInt(document.getElementById('talent1-current-input').value, 10),
-        talent1_target: parseInt(document.getElementById('talent1-target-input').value, 10),
-        talent2_current: parseInt(document.getElementById('talent2-current-input').value, 10),
-        talent2_target: parseInt(document.getElementById('talent2-target-input').value, 10),
-        talent3_current: parseInt(document.getElementById('talent3-current-input').value, 10),
-        talent3_target: parseInt(document.getElementById('talent3-target-input').value, 10),
-    };
-
-    const existingIndex = selectedCharacters.findIndex(c => c.id === currentlyEditingCharId);
-    if (existingIndex > -1) {
-        selectedCharacters[existingIndex] = newSelection;
-    } else {
-        selectedCharacters.push(newSelection);
-    }
-    saveSelection();
-    renderCharacters();
-    closeLevelModal();
-}
-
-function removeCharacterFromPlan() {
-    if (!currentlyEditingCharId) return;
-    if (window.confirm("このキャラクターを計画から削除しますか？")) {
-        const existingIndex = selectedCharacters.findIndex(c => c.id === currentlyEditingCharId);
-        if (existingIndex > -1) {
-            selectedCharacters.splice(existingIndex, 1);
-        }
-        saveSelection();
-        renderCharacters();
-        closeLevelModal();
+async function loadWeapons() {
+    try {
+        const response = await fetch('data/weapons.json');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        allWeaponData = await response.json();
+    } catch (error) {
+        console.error('武器データの読み込みに失敗しました:', error);
+        document.getElementById('weapon-list').innerHTML = '<p style="color: #ffcdd2;">データの読み込みに失敗しました。</p>';
     }
 }
 
-function renderCharacters() {
-    const listElement = document.getElementById('character-list');
+function renderWeapons() {
+    const listElement = document.getElementById('weapon-list');
     if (!listElement) return;
     listElement.innerHTML = '';
-    const sortedCharacters = sortCharacters(allCharacterData, currentSortOrder);
-    sortedCharacters.forEach(character => {
+    const sortedWeapons = sortItems(allWeaponData, currentSortOrder);
+    sortedWeapons.forEach(weapon => {
         const card = document.createElement('div');
-        card.className = 'character-card';
-        if (selectedCharacters.find(c => c.id === character.id)) {
+        card.className = 'weapon-card';
+        if (selectedWeapons.find(w => w.id === weapon.id)) {
             card.classList.add('selected');
         }
-        card.title = character.name;
-        card.innerHTML = `<img src="${character.image_path}" alt="${character.name}" class="character-image"><h4 class="character-name">${character.name}</h4>`;
-        card.addEventListener('click', () => openLevelModal(character.id));
+        card.title = weapon.name;
+        // ★画像のパスは仮。後で修正
+        card.innerHTML = `
+            <img src="images/weapons/${weapon.id}.webp" alt="${weapon.name}" class="weapon-image" onerror="this.style.display='none'">
+            <div class="rarity-stars">${'★'.repeat(weapon.rarity)}</div>
+            <h4 class="weapon-name">${weapon.name}</h4>
+        `;
+        card.addEventListener('click', () => openModal(weapon.id, 'weapon'));
         listElement.appendChild(card);
     });
 }
-    
-function setupSortButtons() {
-    const sortControls = document.querySelector('.sort-controls');
-    if (!sortControls) return;
-    sortControls.querySelectorAll('.sort-btn').forEach(button => {
-        button.addEventListener('click', (e) => {
-            currentSortOrder = e.target.dataset.sortBy;
-            document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
-            e.target.classList.add('active');
-            renderCharacters();
-        });
-    });
-    sortControls.querySelector('.sort-btn[data-sort-by="default"]').classList.add('active');
+
+function loadWeaponSelection() {
+    const saved = localStorage.getItem('laylaDesk_selectedWeapons');
+    if (saved) {
+        try {
+            selectedWeapons = JSON.parse(saved);
+        } catch(e) { selectedWeapons = []; }
+    }
 }
+
+function saveWeaponSelection() {
+    localStorage.setItem('laylaDesk_selectedWeapons', JSON.stringify(selectedWeapons));
+}
+
+// ===================================
+//  キャラクター選択ページ (流用・変更)
+// ===================================
 
 async function loadCharacters() {
     try {
@@ -143,40 +98,167 @@ async function loadCharacters() {
         allCharacterData = await response.json();
     } catch (error) {
         console.error('キャラクターデータの読み込みに失敗しました:', error);
-        const listElement = document.getElementById('character-list');
-        if (listElement) {
-            listElement.innerHTML = '<p style="color: #ffcdd2;">データの読み込みに失敗しました。</p>';
-        }
+        document.getElementById('character-list').innerHTML = '<p style="color: #ffcdd2;">データの読み込みに失敗しました。</p>';
     }
 }
 
-function sortCharacters(characters, sortBy) {
-    const elementOrder = ["炎", "水", "風", "雷", "草", "氷", "岩", "無"];
-    const weaponOrder = ["片手剣", "両手剣", "長柄武器", "弓", "法器", "拳"];
-    const charsCopy = [...characters];
+function renderCharacters() {
+    const listElement = document.getElementById('character-list');
+    if (!listElement) return;
+    listElement.innerHTML = '';
+    const sortedCharacters = sortItems(allCharacterData, currentSortOrder);
+    sortedCharacters.forEach(character => {
+        const card = document.createElement('div');
+        // ★クラス名を変更してスタイルを共通化
+        card.className = 'character-card';
+        if (selectedCharacters.find(c => c.id === character.id)) {
+            card.classList.add('selected');
+        }
+        card.title = character.name;
+        card.innerHTML = `<img src="${character.image_path}" alt="${character.name}" class="character-image"><h4 class="character-name">${character.name}</h4>`;
+        card.addEventListener('click', () => openModal(character.id, 'character'));
+        listElement.appendChild(card);
+    });
+}
+
+// ===================================
+//  共通のモーダル・ソート・保存処理
+// ===================================
+
+function setupSortButtons(type) {
+    const controls = document.querySelector('.sort-controls');
+    if(!controls) return;
+    controls.querySelectorAll('.sort-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            currentSortOrder = e.target.dataset.sortBy;
+            controls.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+            if (type === 'character') renderCharacters();
+            if (type === 'weapon') renderWeapons();
+        });
+    });
+    controls.querySelector('.sort-btn[data-sort-by="default"]').classList.add('active');
+}
+
+function sortItems(items, sortBy) {
+    const itemsCopy = [...items];
     switch (sortBy) {
         case 'element':
-            return charsCopy.sort((a, b) => elementOrder.indexOf(a.element) - elementOrder.indexOf(b.element));
-        case 'weapon':
-            return charsCopy.sort((a, b) => weaponOrder.indexOf(a.weapon_type) - weaponOrder.indexOf(b.weapon_type));
+            return itemsCopy.sort((a, b) => (allCharacterData.find(d=>d.id===a.id)?.element || '').localeCompare(allCharacterData.find(d=>d.id===b.id)?.element || ''));
+        case 'weapon_type': // キャラクター用
+             return itemsCopy.sort((a, b) => (a.weapon_type || '').localeCompare(b.weapon_type || ''));
+        case 'type': // 武器用
+             return itemsCopy.sort((a, b) => (a.type || '').localeCompare(b.type || ''));
+        case 'rarity':
+            return itemsCopy.sort((a, b) => (b.rarity || 0) - (a.rarity || 0));
         default:
-            return charsCopy;
+            return itemsCopy;
     }
 }
 
-function saveSelection() {
-    localStorage.setItem('laylaDesk_selectedCharacters', JSON.stringify(selectedCharacters));
+
+function setupModalEventListeners(type) {
+    const overlay = document.getElementById(`${type}-modal-overlay`);
+    if (!overlay) return;
+    const saveBtn = document.getElementById(`modal-save-${type}-btn`);
+    const cancelBtn = document.getElementById(`modal-cancel-${type}-btn`);
+    const removeBtn = document.getElementById(`modal-remove-${type}-btn`);
+
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeModal(type);
+    });
+    saveBtn.addEventListener('click', () => saveDataFromModal(type));
+    cancelBtn.addEventListener('click', () => closeModal(type));
+    removeBtn.addEventListener('click', () => removeFromPlan(type));
 }
 
-function loadSelection() {
-    const saved = localStorage.getItem('laylaDesk_selectedCharacters');
-    if (saved) {
-        try {
-            selectedCharacters = JSON.parse(saved);
-        } catch(e) {
-            console.error("保存された選択データの読み込みに失敗しました:", e);
-            selectedCharacters = [];
+
+function openModal(id, type) {
+    currentlyEditingId = id;
+    const data = (type === 'character') ? allCharacterData : allWeaponData;
+    const selectionArray = (type === 'character') ? selectedCharacters : selectedWeapons;
+    
+    const itemData = data.find(item => item.id === id);
+    const selectionData = selectionArray.find(item => item.id === id);
+
+    const modalName = document.getElementById(`modal-${type}-name`);
+    const currentLvlInput = document.getElementById(`${type}-current-lvl-input`);
+    const targetLvlInput = document.getElementById(`${type}-target-lvl-input`);
+    const removeBtn = document.getElementById(`modal-remove-${type}-btn`);
+    const overlay = document.getElementById(`${type}-modal-overlay`);
+    
+    modalName.textContent = itemData.name;
+    currentLvlInput.value = selectionData ? selectionData.currentLvl : 1;
+    targetLvlInput.value = selectionData ? selectionData.targetLvl : 90;
+
+    if(type === 'character'){
+        for (let i = 1; i <= 3; i++) {
+            document.getElementById(`talent${i}-current-input`).value = selectionData ? (selectionData[`talent${i}_current`] || 1) : 1;
+            document.getElementById(`talent${i}-target-input`).value = selectionData ? (selectionData[`talent${i}_target`] || 1) : 1;
         }
+    }
+
+    removeBtn.style.display = selectionData ? 'block' : 'none';
+    overlay.style.display = 'flex';
+}
+
+
+function closeModal(type) {
+    document.getElementById(`${type}-modal-overlay`).style.display = 'none';
+    currentlyEditingId = null;
+}
+
+function saveDataFromModal(type) {
+    if (!currentlyEditingId) return;
+    
+    const selectionArray = (type === 'character') ? selectedCharacters : selectedWeapons;
+    const renderFunc = (type === 'character') ? renderCharacters : renderWeapons;
+    const saveFunc = (type === 'character') ? saveSelection : saveWeaponSelection;
+
+    let newSelection = {
+        id: currentlyEditingId,
+        currentLvl: parseInt(document.getElementById(`${type}-current-lvl-input`).value, 10),
+        targetLvl: parseInt(document.getElementById(`${type}-target-lvl-input`).value, 10),
+    };
+
+    if(type === 'character'){
+        Object.assign(newSelection, {
+            talent1_current: parseInt(document.getElementById('talent1-current-input').value, 10),
+            talent1_target: parseInt(document.getElementById('talent1-target-input').value, 10),
+            talent2_current: parseInt(document.getElementById('talent2-current-input').value, 10),
+            talent2_target: parseInt(document.getElementById('talent2-target-input').value, 10),
+            talent3_current: parseInt(document.getElementById('talent3-current-input').value, 10),
+            talent3_target: parseInt(document.getElementById('talent3-target-input').value, 10),
+        });
+    }
+
+    const existingIndex = selectionArray.findIndex(item => item.id === currentlyEditingId);
+    if (existingIndex > -1) {
+        selectionArray[existingIndex] = newSelection;
+    } else {
+        selectionArray.push(newSelection);
+    }
+    
+    saveFunc();
+    renderFunc();
+    closeModal(type);
+}
+
+function removeFromPlan(type) {
+    if (!currentlyEditingId) return;
+
+    const selectionArray = (type === 'character') ? selectedCharacters : selectedWeapons;
+    const renderFunc = (type === 'character') ? renderCharacters : renderWeapons;
+    const saveFunc = (type === 'character') ? saveSelection : saveWeaponSelection;
+
+    if (window.confirm(`この${type === 'character' ? 'キャラクター' : '武器'}を計画から削除しますか？`)) {
+        const existingIndex = selectionArray.findIndex(item => item.id === currentlyEditingId);
+        if (existingIndex > -1) {
+            selectionArray.splice(existingIndex, 1);
+        }
+        saveFunc();
+        renderFunc();
+        closeModal(type);
     }
 }
 
