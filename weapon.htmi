@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>武器選択 - Layla Desk</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+</head>
+<body>
+    <div class="container">
+        <!-- ヘッダーはJavaScriptでここに挿入されます -->
+        <div id="header-placeholder"></div>
+
+        <main>
+            <h2 class="page-title">武器選択</h2>
+            <p style="text-align: center;">この機能は現在開発中です。</p>
+        </main>
+    </div>
+
+    <script src="data/materials.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
