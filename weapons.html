@@ -14,9 +14,44 @@
         <div id="header-placeholder"></div>
 
         <main>
-            <h2 class="page-title">武器選択</h2>
-            <p style="text-align: center;">この機能は現在開発中です。</p>
+            <h2 class="page-title">育成対象の武器を選択</h2>
+            <!-- ▼▼▼ ソートボタンを追加 ▼▼▼ -->
+            <div class="sort-controls">
+                <button class="sort-btn" data-sort-by="default">デフォルト</button>
+                <button class="sort-btn" data-sort-by="type">武器種</button>
+                <button class="sort-btn" data-sort-by="rarity">レアリティ</button>
+            </div>
+            <!-- ▼▼▼ 武器一覧を表示するリストを追加 ▼▼▼ -->
+            <div id="weapon-list" class="item-grid">
+                 <p style="text-align: center;">武器データを読み込み中です...</p>
+            </div>
+            <a href="planning.html" class="next-step-button">選択完了！育成計画へ</a>
         </main>
+    </div>
+    
+    <!-- ▼▼▼ 武器用のモーダルウィンドウ ▼▼▼ -->
+    <div id="weapon-modal-overlay" class="modal-overlay">
+        <div id="weapon-modal" class="modal">
+            <h3 id="modal-weapon-name">武器名</h3>
+            <div class="modal-content">
+                <div class="modal-section">
+                    <h4>武器レベル</h4>
+                    <div class="modal-level-inputs">
+                        <label for="weapon-current-lvl-input">現在レベル</label>
+                        <input type="number" id="weapon-current-lvl-input" value="1">
+                    </div>
+                    <div class="modal-level-inputs">
+                        <label for="weapon-target-lvl-input">目標レベル</label>
+                        <input type="number" id="weapon-target-lvl-input" value="90">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="modal-remove-weapon-btn" class="btn-danger">計画から削除</button>
+                <button id="modal-cancel-weapon-btn" class="btn-secondary">キャンセル</button>
+                <button id="modal-save-weapon-btn" class="btn-primary">決定</button>
+            </div>
+        </div>
     </div>
 
     <script src="js/layout.js"></script>
