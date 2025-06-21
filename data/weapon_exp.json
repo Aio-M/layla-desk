@@ -1,0 +1,24 @@
+{
+  "exp_levels": [
+    { "level": 1, "exp": 0 }, { "level": 2, "exp": 600 }, { "level": 3, "exp": 1375 }, { "level": 4, "exp": 2300 }, { "level": 5, "exp": 3400 },
+    { "level": 6, "exp": 4675 }, { "level": 7, "exp": 6150 }, { "level": 8, "exp": 7825 }, { "level": 9, "exp": 9725 }, { "level": 10, "exp": 11825 },
+    { "level": 11, "exp": 14150 }, { "level": 12, "exp": 16725 }, { "level": 13, "exp": 19525 }, { "level": 14, "exp": 22575 }, { "level": 15, "exp": 25875 },
+    { "level": 16, "exp": 29450 }, { "level": 17, "exp": 33275 }, { "level": 18, "exp": 37400 }, { "level": 19, "exp": 41800 }, { "level": 20, "exp": 46500 },
+    { "level": 21, "exp": 53725 }, { "level": 22, "exp": 61350 }, { "level": 23, "exp": 69375 }, { "level": 24, "exp": 77825 }, { "level": 25, "exp": 86700 },
+    { "level": 26, "exp": 96000 }, { "level": 27, "exp": 105750 }, { "level": 28, "exp": 115950 }, { "level": 29, "exp": 126600 }, { "level": 30, "exp": 137700 },
+    { "level": 31, "exp": 149300 }, { "level": 32, "exp": 161400 }, { "level": 33, "exp": 173975 }, { "level": 34, "exp": 187050 }, { "level": 35, "exp": 200650 },
+    { "level": 36, "exp": 214775 }, { "level": 37, "exp": 229425 }, { "level": 38, "exp": 244625 }, { "level": 39, "exp": 260375 }, { "level": 40, "exp": 276700 },
+    { "level": 41, "exp": 298325 }, { "level": 42, "exp": 320625 }, { "level": 43, "exp": 343600 }, { "level": 44, "exp": 367250 }, { "level": 45, "exp": 391600 },
+    { "level": 46, "exp": 416650 }, { "level": 47, "exp": 442425 }, { "level": 48, "exp": 468900 }, { "level": 49, "exp": 496100 }, { "level": 50, "exp": 524025 },
+    { "level": 51, "exp": 558000 }, { "level": 52, "exp": 592950 }, { "level": 53, "exp": 628875 }, { "level": 54, "exp": 665800 }, { "level": 55, "exp": 703725 },
+    { "level": 56, "exp": 742675 }, { "level": 57, "exp": 782650 }, { "level": 58, "exp": 823675 }, { "level": 59, "exp": 865750 }, { "level": 60, "exp": 908900 },
+    { "level": 61, "exp": 958550 }, { "level": 62, "exp": 1009325 }, { "level": 63, "exp": 1061225 }, { "level": 64, "exp": 1114275 }, { "level": 65, "exp": 1168475 },
+    { "level": 66, "exp": 1223850 }, { "level": 67, "exp": 1280425 }, { "level": 68, "exp": 1338200 }, { "level": 69, "exp": 1397175 }, { "level": 70, "exp": 1457400 },
+    { "level": 71, "exp": 1524300 }, { "level": 72, "exp": 1592475 }, { "level": 73, "exp": 1661925 }, { "level": 74, "exp": 1732675 }, { "level": 75, "exp": 1804725 },
+    { "level": 76, "exp": 1878100 }, { "level": 77, "exp": 1952800 }, { "level": 78, "exp": 2028850 }, { "level": 79, "exp": 2106250 }, { "level": 80, "exp": 2185025 },
+    { "level": 81, "exp": 2270625 }, { "level": 82, "exp": 2357600 }, { "level": 83, "exp": 2445950 }, { "level": 84, "exp": 2535700 }, { "level": 85, "exp": 2626850 },
+    { "level": 86, "exp": 2719425 }, { "level": 87, "exp": 2813400 }, { "level": 88, "exp": 2908825 }, { "level": 89, "exp": 3005700 }, { "level": 90, "exp": 3103900 }
+  ],
+  "mystic_ore_exp": 10000,
+  "mora_per_exp": 1
+}
