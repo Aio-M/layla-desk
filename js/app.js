@@ -391,17 +391,14 @@ function displaySelectedWeapons() {
 }
 // ★★★ ここまで新しい関数 ★★★
 
-
 function displayRequiredMaterials() {
     const listElement = document.getElementById('materials-list');
     listElement.innerHTML = '';
-    const totalRequired = calculateTotalMaterials(); // ★この関数を後で修正する
-    
-    // 素材IDのリストを取得し、表示順をソート（モラを先頭に）
+    const totalRequired = calculateTotalMaterials();
+
     const sortedMaterialIds = Object.keys(totalRequired).sort((a, b) => {
         if (a === 'mora') return -1;
         if (b === 'mora') return 1;
-        // 他の素材は名前順など、必要に応じてソートロジックを追加
         const nameA = allMaterialsData[a]?.name || a;
         const nameB = allMaterialsData[b]?.name || b;
         return nameA.localeCompare(nameB);
@@ -411,51 +408,51 @@ function displayRequiredMaterials() {
         if (totalRequired[materialId] <= 0) continue;
         const materialInfo = allMaterialsData[materialId];
         if (!materialInfo) {
-             console.warn(`警告: ${materialId} の情報が materials.js に見つかりません。`);
-             continue;
+            console.warn(`警告: ${materialId} の情報が materials.js に見つかりません。`);
+            continue;
         }
         const currentAmount = materialInventory[materialId] || 0;
         const remaining = totalRequired[materialId] - currentAmount;
 
         const item = document.createElement('div');
         item.className = 'material-item';
-         // 必要数が満たされたら 'completed' クラスを付与
-        if(remaining <= 0) {
+        if (remaining <= 0) {
             item.classList.add('completed');
         }
-
+        
+        // ★★★ スライダー形式のHTMLに戻す ★★★
         item.innerHTML = `
             <img src="${materialInfo.icon}" alt="${materialInfo.name}" class="material-icon">
             <div class="material-info">
                 <div class="material-name">${materialInfo.name}</div>
                 <div class="material-amount-display">
-                    <span class="current-amount">${currentAmount.toLocaleString()}</span> / <span class="total-amount">${totalRequired[materialId].toLocaleString()}</span>
+                    <span id="current-mat-display-${materialId}">${currentAmount.toLocaleString()}</span> / ${totalRequired[materialId].toLocaleString()}
                     <span class="remaining-amount">(残り: ${Math.max(0, remaining).toLocaleString()})</span>
                 </div>
             </div>
             <div class="value-adjuster">
                 <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="-10">--</button>
                 <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="-1">-</button>
-                <input type="number" class="manual-input" id="input-material-${materialId}" value="${currentAmount}">
+                <input type="range" class="value-slider" id="slider-material-${materialId}"
+                       min="0" max="${totalRequired[materialId]}" value="${currentAmount}" data-id="${materialId}" data-type="material">
                 <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="1">+</button>
                 <button class="btn-step" data-id="${materialId}" data-type="material" data-amount="10">++</button>
             </div>`;
         listElement.appendChild(item);
     }
 
+    // イベントリスナーもスライダーに対応させる
     listElement.querySelectorAll('.btn-step[data-type="material"]').forEach(button => {
         button.addEventListener('click', (e) => {
             updateInventory(e.target.dataset.id, parseInt(e.target.dataset.amount, 10));
         });
     });
-     listElement.querySelectorAll('.manual-input').forEach(input => {
-        input.addEventListener('change', (e) => {
-            const materialId = e.target.id.replace('input-material-', '');
-            updateInventory(materialId, parseInt(e.target.value, 10), true);
+    listElement.querySelectorAll('.value-slider[data-type="material"]').forEach(slider => {
+        slider.addEventListener('input', (e) => {
+            updateInventory(e.target.dataset.id, parseInt(e.target.value, 10), true);
         });
     });
 }
-
 
 function calculateTotalMaterials() {
     const total = { mora: 0 };
@@ -608,21 +605,39 @@ function calculateTotalMaterials() {
 
 // リアルタイム再計算のロジック
 function updateInventory(materialId, value, isAbsolute = false) {
-    if (!materialInventory[materialId] && !isAbsolute) materialInventory[materialId] = 0;
+    const totalRequired = calculateTotalMaterials()[materialId] || 0;
+    if (!materialInventory[materialId]) materialInventory[materialId] = 0;
+
+    let newValue = isAbsolute ? value : materialInventory[materialId] + value;
     
-    let newValue = isAbsolute ? value : (materialInventory[materialId] || 0) + value;
+    // 値が0未満または必要数を超えないように丸める
     if (newValue < 0) newValue = 0;
+    if (newValue > totalRequired) newValue = totalRequired;
     
     materialInventory[materialId] = newValue;
     saveInventory();
+
+    // 画面の表示を更新
+    const countElement = document.getElementById(`current-mat-display-${materialId}`);
+    const sliderElement = document.getElementById(`slider-material-${materialId}`);
     
-    // 表示を更新
-    const currentAmountEl = document.querySelector(`.material-item .current-amount`);
-    const remainingAmountEl = document.querySelector(`.material-item .remaining-amount`);
-    const inputEl = document.getElementById(`input-material-${materialId}`);
-    
-    // 再計算して全体の表示を更新するのが確実
-    displayRequiredMaterials(); 
+    if (countElement) countElement.textContent = newValue.toLocaleString();
+    if (sliderElement) sliderElement.value = newValue;
+
+    // 残り数の表示も更新
+    const remaining = totalRequired - newValue;
+    const remainingEl = sliderElement.closest('.material-item').querySelector('.remaining-amount');
+    if(remainingEl) remainingEl.textContent = `(残り: ${Math.max(0, remaining).toLocaleString()})`;
+
+    // 必要数を満たしたら 'completed' クラスを付け外しする
+    const itemEl = sliderElement.closest('.material-item');
+    if (itemEl) {
+        if (remaining <= 0) {
+            itemEl.classList.add('completed');
+        } else {
+            itemEl.classList.remove('completed');
+        }
+    }
 }
 
 let debounceTimer;
