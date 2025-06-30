@@ -14,31 +14,73 @@
 </head>
 <body>
     <div class="container">
-    <div id="header-placeholder"></div>
+        <div id="header-placeholder"></div>
         <main id="planning-board">
-            <h2 class="page-title">育成計画</h2>
-
-            <div class="section">
-                <h3>育成対象キャラクター</h3>
-                <div id="selected-characters-list">
-                    </div>
-            </div>
-
-            <div class="section">
-                <h3>育成対象の武器</h3>
-                <div id="selected-weapons-list">
-                </div>
-            </div>
-            <div class="section">
-                <h3>必要素材一覧</h3>
-                <div id="materials-list">
-                    </div>
-            </div>
-
-            <a href="characters.html" class="back-button">キャラクター選択に戻る</a>
-        </main>
+            </main>
     </div>
 
+    <div id="character-modal-overlay" class="modal-overlay">
+        <div id="character-modal" class="modal">
+            <h3 id="modal-character-name">キャラクター名</h3>
+            <div class="modal-content">
+                <div class="modal-section">
+                    <h4>キャラクターレベル</h4>
+                    <div class="modal-level-inputs">
+                        <label for="character-current-lvl-input">現在レベル</label>
+                        <input type="number" id="character-current-lvl-input" value="1">
+                    </div>
+                    <div class="modal-level-inputs">
+                        <label for="character-target-lvl-input">目標レベル</label>
+                        <input type="number" id="character-target-lvl-input" value="90">
+                    </div>
+                </div>
+                <div class="modal-section">
+                    <h4>天賦レベル</h4>
+                    <div class="modal-talent-inputs">
+                        <span>通常</span>
+                        <input type="number" id="talent1-current-input" value="1"> → <input type="number" id="talent1-target-input" value="1">
+                    </div>
+                    <div class="modal-talent-inputs">
+                        <span>スキル</span>
+                        <input type="number" id="talent2-current-input" value="1"> → <input type="number" id="talent2-target-input" value="1">
+                    </div>
+                    <div class="modal-talent-inputs">
+                        <span>爆発</span>
+                        <input type="number" id="talent3-current-input" value="1"> → <input type="number" id="talent3-target-input" value="1">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="modal-remove-character-btn" class="btn-danger">計画から削除</button>
+                <button id="modal-cancel-character-btn" class="btn-secondary">キャンセル</button>
+                <button id="modal-save-character-btn" class="btn-primary">決定</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="weapon-modal-overlay" class="modal-overlay">
+        <div id="weapon-modal" class="modal">
+            <h3 id="modal-weapon-name">武器名</h3>
+            <div class="modal-content">
+                <div class="modal-section">
+                    <h4>武器レベル</h4>
+                    <div class="modal-level-inputs">
+                        <label for="weapon-current-lvl-input">現在レベル</label>
+                        <input type="number" id="weapon-current-lvl-input" value="1">
+                    </div>
+                    <div class="modal-level-inputs">
+                        <label for="weapon-target-lvl-input">目標レベル</label>
+                        <input type="number" id="weapon-target-lvl-input" value="90">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="modal-remove-weapon-btn" class="btn-danger">計画から削除</button>
+                <button id="modal-cancel-weapon-btn" class="btn-secondary">キャンセル</button>
+                <button id="modal-save-weapon-btn" class="btn-primary">決定</button>
+            </div>
+        </div>
+    </div>
     <script src="js/layout.js"></script>
     <script src="data/materials.js"></script>
     <script src="js/app.js"></script>
