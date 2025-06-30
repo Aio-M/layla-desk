@@ -469,7 +469,9 @@ function calculateTotalMaterials() {
     selectedCharacters.forEach(charPlan => {
         const charData = allCharacterData.find(c => c.id === charPlan.id);
         if (!charData) return;
-
+        // ▼▼▼ デバッグ用 ▼▼▼
+        console.log(`【武器計算開始】: ${weaponData.name}`);
+        // ▲▲▲ デバッグ用 ▲▲▲
         const expData = allLevelCosts.character_exp;
         const targetExp = expData.find(e => e.level === charPlan.targetLvl)?.exp || 0;
         const currentExp = expData.find(e => e.level === charPlan.currentLvl)?.exp || 0;
